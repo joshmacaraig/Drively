@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { LockKey, CheckCircle } from '@phosphor-icons/react';
+import AuthHeader from '@/components/auth/AuthHeader';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -74,21 +74,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/images/logo2.png"
-              alt="Drively Logo"
-              width={160}
-              height={50}
-              className="h-12 w-auto"
-              priority
-            />
-          </Link>
-        </div>
-      </header>
+      <AuthHeader />
 
       {/* Reset Password Form */}
       <main className="flex-1 flex items-center justify-center px-4 py-12">

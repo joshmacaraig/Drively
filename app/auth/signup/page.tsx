@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -15,6 +14,7 @@ import {
   CurrencyCircleDollar
 } from '@phosphor-icons/react';
 import type { UserRole } from '@/lib/types/database';
+import AuthHeader from '@/components/auth/AuthHeader';
 
 function SignupForm() {
   const router = useRouter();
@@ -98,21 +98,7 @@ function SignupForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/images/logo2.png"
-              alt="Drively Logo"
-              width={160}
-              height={50}
-              className="h-12 w-auto"
-              priority
-            />
-          </Link>
-        </div>
-      </header>
+      <AuthHeader />
 
       {/* Signup Form */}
       <main className="flex-1 flex items-center justify-center px-4 py-12">
