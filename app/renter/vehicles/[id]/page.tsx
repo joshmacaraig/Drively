@@ -158,7 +158,7 @@ export default async function VehicleDetailPage({
                   {/* Thumbnail Grid */}
                   {sortedImages.length > 1 && (
                     <div className="grid grid-cols-4 gap-3">
-                      {sortedImages.slice(1, 5).map((image) => (
+                      {sortedImages.slice(1, 5).map((image: any) => (
                         <div key={image.id} className="relative aspect-square overflow-hidden rounded-lg">
                           <Image
                             src={image.image_url}
