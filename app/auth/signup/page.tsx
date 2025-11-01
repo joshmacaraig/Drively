@@ -11,7 +11,8 @@ import {
   Phone,
   UserPlus,
   Car,
-  CurrencyCircleDollar
+  CurrencyCircleDollar,
+  CheckCircle
 } from '@phosphor-icons/react';
 import type { UserRole } from '@/lib/types/database';
 import AuthHeader from '@/components/auth/AuthHeader';
@@ -29,6 +30,7 @@ function SignupForm() {
   const [role, setRole] = useState<UserRole>('renter');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (roleParam === 'owner') {
@@ -76,17 +78,8 @@ function SignupForm() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        // Profile is automatically created by database trigger
-        // Wait a moment for the trigger to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Redirect based on role
-        if (role === 'car_owner') {
-          router.push('/owner/dashboard');
-        } else {
-          router.push('/renter/dashboard');
-        }
-        router.refresh();
+        // Show success message asking user to verify email
+        setSuccess(true);
       }
     } catch (err: any) {
       console.error('Signup error:', err);
@@ -103,21 +96,22 @@ function SignupForm() {
       {/* Signup Form */}
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-secondary-900 mb-2">
-                Create Account
-              </h1>
-              <p className="text-secondary-600">
-                Join Drively and start your journey
-              </p>
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {error}
+          {!success ? (
+            <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-secondary-900 mb-2">
+                  Create Account
+                </h1>
+                <p className="text-secondary-600">
+                  Join Drively and start your journey
+                </p>
               </div>
-            )}
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  {error}
+                </div>
+              )}
 
             {/* Role Selection */}
             <div className="mb-6">
@@ -287,6 +281,42 @@ function SignupForm() {
               </p>
             </div>
           </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle size={32} weight="duotone" className="text-green-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-secondary-900 mb-4">
+                Check Your Email
+              </h1>
+              <p className="text-secondary-600 mb-6">
+                We've sent a verification link to <strong>{email}</strong>.
+                Please check your email and click the link to verify your account.
+              </p>
+              <p className="text-sm text-secondary-500 mb-6">
+                Didn't receive the email? Check your spam folder.
+              </p>
+              <div className="space-y-3">
+                <Link
+                  href="/auth/login"
+                  className="block w-full bg-secondary-900 hover:bg-secondary-800 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                >
+                  Go to Login
+                </Link>
+                <button
+                  onClick={() => {
+                    setSuccess(false);
+                    setEmail('');
+                    setPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="w-full text-secondary-600 hover:text-secondary-900 font-medium py-3 transition-colors"
+                >
+                  Sign up with different email
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
