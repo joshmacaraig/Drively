@@ -183,7 +183,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-20">
+          <div className="grid md:grid-cols-3 gap-8 mb-20 max-w-sm md:max-w-none mx-auto">
             <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-all border border-secondary-100">
               <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6">
                 <UserCheck size={32} weight="duotone" className="text-primary-600" />
@@ -433,7 +433,7 @@ export default function Home() {
                 alt="Drively Logo"
                 width={180}
                 height={60}
-                className="h-14 w-auto mb-4 brightness-0 invert"
+                className="h-14 w-auto mb-4"
               />
               <p className="text-secondary-400 text-sm">
                 A peer-to-peer car rental platform serving Candelaria, Quezon.

@@ -237,7 +237,7 @@ export default function OwnerPage() {
             alt="Drively Logo"
             width={180}
             height={60}
-            className="h-14 w-auto mx-auto mb-4 brightness-0 invert"
+            className="h-14 w-auto mx-auto mb-4"
           />
           <p className="text-secondary-500 text-sm">
             © 2025 Drively. All rights reserved.
