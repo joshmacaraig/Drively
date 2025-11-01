@@ -65,8 +65,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex items-center justify-between">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 py-6">
+          <nav className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Image
               src="/images/logo1.png"
@@ -105,6 +106,7 @@ export default function Home() {
             )}
           </div>
         </nav>
+        </div>
       </header>
 
       {/* Hero Section */}
