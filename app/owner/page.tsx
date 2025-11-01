@@ -11,7 +11,7 @@ export default function OwnerPage() {
       <header className="container mx-auto px-4 py-6">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/images/logo1.png"
+            src="/images/logo2.png"
             alt="Drively Logo"
             width={160}
             height={50}
@@ -233,7 +233,7 @@ export default function OwnerPage() {
       <footer className="bg-secondary-900 text-white py-12 mt-20">
         <div className="container mx-auto px-4 text-center">
           <Image
-            src="/images/logo1.png"
+            src="/images/logo2.png"
             alt="Drively Logo"
             width={180}
             height={60}

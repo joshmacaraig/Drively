@@ -103,7 +103,7 @@ function SignupForm() {
         <div className="container mx-auto px-4 py-6">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/images/logo1.png"
+              src="/images/logo2.png"
               alt="Drively Logo"
               width={160}
               height={50}

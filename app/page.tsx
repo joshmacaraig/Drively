@@ -66,15 +66,15 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-3">
           <nav className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Image
-              src="/images/logo1.png"
+              src="/images/logo2.png"
               alt="Drively Logo"
-              width={160}
-              height={50}
-              className="h-12 w-auto"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
               priority
             />
           </div>
@@ -185,37 +185,37 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 mb-20 max-w-sm md:max-w-none mx-auto">
             <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-all border border-secondary-100">
-              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <UserCheck size={32} weight="duotone" className="text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-secondary-900 mb-3">
+              <h3 className="text-xl font-bold text-secondary-900 mb-3 text-center">
                 Verified Owners
               </h3>
-              <p className="text-secondary-600 leading-relaxed">
+              <p className="text-secondary-600 leading-relaxed text-center">
                 All car owners undergo thorough verification to ensure you rent from trusted individuals in your community.
               </p>
             </div>
 
             <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-all border border-secondary-100">
-              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <FileText size={32} weight="duotone" className="text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-secondary-900 mb-3">
+              <h3 className="text-xl font-bold text-secondary-900 mb-3 text-center">
                 Documented Process
               </h3>
-              <p className="text-secondary-600 leading-relaxed">
+              <p className="text-secondary-600 leading-relaxed text-center">
                 Complete pickup and return checklists with photo documentation ensure transparency and accountability.
               </p>
             </div>
 
             <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-all border border-secondary-100">
-              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <Clock size={32} weight="duotone" className="text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-secondary-900 mb-3">
+              <h3 className="text-xl font-bold text-secondary-900 mb-3 text-center">
                 Flexible Booking
               </h3>
-              <p className="text-secondary-600 leading-relaxed">
+              <p className="text-secondary-600 leading-relaxed text-center">
                 Book vehicles for the exact dates you need with transparent pricing and clear rental terms.
               </p>
             </div>
@@ -429,11 +429,11 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <Image
-                src="/images/logo1.png"
+                src="/images/logo2.png"
                 alt="Drively Logo"
                 width={180}
                 height={60}
-                className="h-14 w-auto mb-4"
+                className="h-14 w-auto mb-4 brightness-0 invert"
               />
               <p className="text-secondary-400 text-sm">
                 A peer-to-peer car rental platform serving Candelaria, Quezon.

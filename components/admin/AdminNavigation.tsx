@@ -49,7 +49,7 @@ export default function AdminNavigation({
             {/* Logo */}
             <Link href="/admin/dashboard" className="flex items-center gap-2 flex-shrink-0">
               <Image
-                src="/images/logo1.png"
+                src="/images/logo2.png"
                 alt="Drively"
                 width={140}
                 height={45}
