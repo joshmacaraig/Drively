@@ -185,7 +185,7 @@ function OwnerRentalsPageContent() {
     return '';
   };
 
-  const handleDateClick = (date: Date) => {
+  const handleDateClick = (date: Date | null) => {
     setSelectedDate(date);
   };
 
