@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Target,
   Star,
+  Fire,
 } from '@phosphor-icons/react';
 
 export default function NewBookingPage() {
