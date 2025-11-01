@@ -16,7 +16,14 @@
       "Bash(node scripts/run-migration.js:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: Drively App - P2P Car Rental Platform\n\nFeatures:\n- Next.js 16 + TypeScript frontend\n- Supabase backend (auth, database, storage)\n- Multi-role system (Admin, Owner, Renter)\n- Car listing and rental management\n- User verification system\n- Booking calendar and timeline\n- Maintenance tracking\n- Responsive design with mobile navigation\n- Image upload and gallery\n\n🚀 Ready for deployment to Vercel\nEOF\n)\")",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

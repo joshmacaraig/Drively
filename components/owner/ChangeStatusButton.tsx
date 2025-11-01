@@ -71,7 +71,7 @@ export default function ChangeStatusButton({ carId, currentStatus }: ChangeStatu
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-secondary-200 py-2 z-20">
             {statuses.map((status) => (
               <button
-                key={status.value}
+                key={String(status.value)}
                 onClick={() => handleStatusChange(status.value)}
                 disabled={loading}
                 className={`w-full text-left px-4 py-2 hover:bg-secondary-50 transition-colors flex items-center justify-between ${
