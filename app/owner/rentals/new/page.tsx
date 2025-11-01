@@ -21,6 +21,7 @@ import {
   Target,
   Star,
   Fire,
+  Trophy,
 } from '@phosphor-icons/react';
 
 export default function NewBookingPage() {
