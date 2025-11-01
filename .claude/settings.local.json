@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(npx supabase db push)",
+      "Bash(nul)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout /t 5:*)",
+      "Bash(del /q \"public\\setup-admin.html\" \"supabase\\create_admin_user.sql\" \"scripts\\run-migration.js\" \"supabase\\test_verification_data.sql\" \"supabase\\migrations\\017_create_admin_account_and_policies.sql\" \"ADMIN_SETUP.md\" \"ADMIN_DASHBOARD_COMPLETE.md\" \"SETUP_ADMIN_NOW.md\" \"WHY_NO_VERIFICATIONS.md\" 2)",
+      "Bash(npx supabase:*)",
+      "Bash(node scripts/run-migration.js:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(.gitignore)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
