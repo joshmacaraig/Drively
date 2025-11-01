@@ -70,14 +70,14 @@ export default async function VehicleDetailPage({
   }
 
   // Sort images by display order, primary first
-  const sortedImages = car.car_images?.sort((a, b) => {
+  const sortedImages = car.car_images?.sort((a: any, b: any) => {
     if (a.is_primary && !b.is_primary) return -1;
     if (!a.is_primary && b.is_primary) return 1;
     return a.display_order - b.display_order;
   }) || [];
 
   // Get active rentals
-  const activeRentals = car.rentals?.filter((r) =>
+  const activeRentals = car.rentals?.filter((r: any) =>
     ['pending', 'confirmed', 'active'].includes(r.status)
   ) || [];
 
