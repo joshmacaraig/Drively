@@ -19,14 +19,14 @@ import type { UserRole } from '@/lib/types/database';
 export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const roleParam = searchParams.get('role') as UserRole | null;
+  const roleParam = searchParams.get('role');
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<UserRole>(roleParam === 'owner' ? 'car_owner' : 'renter');
+  const [role, setRole] = useState<UserRole>('renter');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
