@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useToast } from '@/components/ui/ToastContainer';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { renterQuotes, savingQuotes } from '@/lib/loadingQuotes';
+import RenterNavigation from '@/components/renter/RenterNavigation';
 
 export default function RenterProfilePage() {
   const router = useRouter();
@@ -271,22 +272,15 @@ export default function RenterProfilePage() {
   const hasAllDocs = profile?.proof_of_id_urls?.length > 0 && profile?.proof_of_address_urls?.length > 0 && profile?.drivers_license_urls?.length > 0;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/renter/dashboard" className="flex items-center gap-2 text-gray-900 hover:text-gray-700">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              <span className="font-medium">Back to Dashboard</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
+      {/* Navigation */}
+      <RenterNavigation
+        userFullName={profile?.full_name}
+        userAvatar={profile?.avatar_url}
+        isVerified={isVerified}
+      />
 
-      <main className="max-w-4xl mx-auto px-6 py-12">
+      <main className="max-w-4xl mx-auto px-6 py-12 pb-24 md:pb-12">
         {/* Header Section */}
         <div className="mb-10">
           <h1 className="text-4xl font-semibold text-gray-900 mb-2">
