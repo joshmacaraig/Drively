@@ -44,14 +44,7 @@ next-env.d.ts
 
 # temporary files and scripts
 *.sql
-ADMIN_*.md
-DO_THIS_NOW.md
-FIX_*.sql
-FIX_*.md
-CHECK_*.sql
-SETUP_*.md
-WHY_*.md
-*_COMPLETE.md
+*.md
 nul
 
 # Supabase
