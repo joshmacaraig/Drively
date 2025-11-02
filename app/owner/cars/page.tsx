@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Car, Plus, MapPin, CurrencyCircleDollar, GearSix, Users } from '@phosphor-icons/react/dist/ssr';
+import { Car, Plus, MapPin, CurrencyCircleDollar, GearSix, Users, EyeSlash } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
 import Pagination from '@/components/admin/Pagination';
@@ -81,6 +81,8 @@ export default async function OwnerCarsPage({
     .eq('id', user.id)
     .single();
 
+  const isVerified = profile?.verification_status === 'verified';
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       {/* Navigation */}
@@ -91,6 +93,24 @@ export default async function OwnerCarsPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto">
+          {/* Verification Notice */}
+          {!isVerified && cars && cars.length > 0 && (
+            <div className="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4 md:p-5 mb-6">
+              <div className="flex gap-3">
+                <EyeSlash size={24} weight="fill" className="text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-base font-bold text-blue-900 mb-1">
+                    Listings Hidden from Renters
+                  </h3>
+                  <p className="text-sm text-blue-800">
+                    Your {cars.length} car{cars.length > 1 ? 's are' : ' is'} not visible to renters until you verify your identity.
+                    {' '}<Link href="/owner/profile" className="underline font-semibold hover:text-blue-900">Complete verification</Link> to start receiving bookings.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8 mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">

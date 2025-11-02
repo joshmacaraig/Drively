@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
+import { Warning, IdentificationCard } from '@phosphor-icons/react/dist/ssr';
 
 export default async function OwnerDashboard() {
   const supabase = await createClient();
@@ -37,6 +38,9 @@ export default async function OwnerDashboard() {
   const activeRentals = rentals?.length || 0;
   const totalEarnings = rentals?.reduce((sum, rental) => sum + parseFloat(rental.total_amount), 0) || 0;
 
+  const isVerified = profile?.verification_status === 'verified';
+  const hasProofOfId = profile?.proof_of_id_urls?.length > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       {/* Navigation */}
@@ -47,6 +51,32 @@ export default async function OwnerDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto">
+          {/* Verification Warning Banner */}
+          {!isVerified && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 md:p-6 mb-6 shadow-lg">
+              <div className="flex gap-3">
+                <Warning size={24} weight="fill" className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="text-base md:text-lg font-bold text-yellow-900 mb-1">
+                    Verification Required
+                  </h3>
+                  <p className="text-sm md:text-base text-yellow-800 mb-3">
+                    Your car listings are hidden from renters until you verify your identity.
+                    {!hasProofOfId && ' Upload your government-issued ID to get verified.'}
+                    {hasProofOfId && profile?.verification_status === 'pending' && ' Your documents are under review.'}
+                  </p>
+                  <Link
+                    href="/owner/profile"
+                    className="inline-flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors"
+                  >
+                    <IdentificationCard size={20} weight="duotone" />
+                    {!hasProofOfId ? 'Upload ID Now' : 'View Verification Status'}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8">
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-2">

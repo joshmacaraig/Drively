@@ -66,8 +66,9 @@ export default async function BrowsePage({
   // Build base query for counting
   let countQuery = supabase
     .from('cars')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_active', true);
+    .select('*, profiles!owner_id(verification_status)', { count: 'exact', head: true })
+    .eq('is_active', true)
+    .eq('profiles.verification_status', 'verified');
 
   // Build query for active cars with all related data
   let query = supabase
@@ -83,7 +84,8 @@ export default async function BrowsePage({
       profiles:owner_id (
         id,
         full_name,
-        avatar_url
+        avatar_url,
+        verification_status
       ),
       rentals (
         id,
@@ -93,6 +95,7 @@ export default async function BrowsePage({
       )
     `)
     .eq('is_active', true)
+    .eq('profiles.verification_status', 'verified')
     .order('created_at', { ascending: false });
 
   // If we have date-filtered availability, apply it
