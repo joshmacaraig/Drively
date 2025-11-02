@@ -488,6 +488,9 @@ function DocumentUpload({
   onUpload: (field: string, files: FileList) => void;
   onDelete: (field: string, url: string) => void;
 }) {
+  const [deleteConfirm, setDeleteConfirm] = useState<{ field: string; url: string; index: number } | null>(null);
+  const [viewImage, setViewImage] = useState<string | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -495,6 +498,17 @@ function DocumentUpload({
     }
     // Reset input
     e.target.value = '';
+  };
+
+  const handleDeleteClick = (url: string, index: number) => {
+    setDeleteConfirm({ field: fieldName, url, index });
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      onDelete(deleteConfirm.field, deleteConfirm.url);
+      setDeleteConfirm(null);
+    }
   };
 
   const hasImages = currentUrls.length > 0;
@@ -519,8 +533,11 @@ function DocumentUpload({
       {hasImages && (
         <div className="grid grid-cols-2 gap-4 mb-4">
           {currentUrls.map((path, index) => (
-            <div key={path} className="relative group">
-              <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+            <div key={path} className="relative group border-2 border-gray-200 rounded-lg overflow-hidden hover:border-primary-500 transition-colors">
+              <div
+                className="relative aspect-video bg-gray-100 cursor-pointer"
+                onClick={() => signedUrls[path] && setViewImage(signedUrls[path])}
+              >
                 {signedUrls[path] ? (
                   <Image
                     src={signedUrls[path]}
@@ -535,19 +552,85 @@ function DocumentUpload({
                   </div>
                 )}
               </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
               <button
-                onClick={() => onDelete(fieldName, path)}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleDeleteClick(path, index)}
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-lg transition-all"
+                title="Delete image"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
               <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                 Image {index + 1}
               </div>
+              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Click to view
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 p-3 rounded-full">
+                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Delete Image?</h3>
+            </div>
+
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete Image {deleteConfirm.index + 1}? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Viewer Modal */}
+      {viewImage && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+          onClick={() => setViewImage(null)}
+        >
+          <button
+            onClick={() => setViewImage(null)}
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div className="relative w-full h-full max-w-5xl max-h-[90vh]">
+            <Image
+              src={viewImage}
+              alt="Document preview"
+              fill
+              className="object-contain"
+              unoptimized
+            />
+          </div>
         </div>
       )}
 

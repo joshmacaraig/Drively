@@ -240,9 +240,9 @@ export default async function OwnerCarsPage({
                     </div>
                   </div>
                 </div>
-                );
-              })}
-            </div>
+              );
+            })}
+          </div>
 
             {/* Pagination */}
             <Pagination

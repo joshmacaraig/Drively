@@ -25,7 +25,8 @@
       "Bash(git commit:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsx:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(where:*)"
     ],
     "deny": [],
     "ask": []
