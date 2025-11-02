@@ -82,15 +82,21 @@ export default function OwnerProfilePage() {
         }
       }
 
+      console.log('Fetching signed URL for path:', path);
+
       const { data, error } = await supabase.storage
         .from('verification-documents')
         .createSignedUrl(path, 3600);
 
-      if (data?.signedUrl) {
+      if (error) {
+        console.error('Error creating signed URL for', path, ':', error);
+      } else if (data?.signedUrl) {
+        console.log('Successfully created signed URL for', path);
         urls[pathOrUrl] = data.signedUrl;
       }
     }
 
+    console.log('Final signed URLs:', urls);
     setSignedUrls(urls);
   }
 
@@ -135,14 +141,22 @@ export default function OwnerProfilePage() {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/proof_of_id/${Date.now()}.${fileExt}`;
 
+        console.log('Uploading file to:', fileName);
+
         const { data, error: uploadError } = await supabase.storage
           .from('verification-documents')
           .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
 
+        console.log('Upload successful, path:', data.path);
         newUrls.push(data.path);
       }
+
+      console.log('All files uploaded. New URLs array:', newUrls);
 
       // Update profile with new URLs
       const { error: updateError } = await supabase
@@ -396,6 +410,7 @@ export default function OwnerProfilePage() {
                         alt={`ID ${index + 1}`}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
@@ -502,6 +517,7 @@ export default function OwnerProfilePage() {
               alt="Document"
               fill
               className="object-contain"
+              unoptimized
             />
           </div>
         </div>
