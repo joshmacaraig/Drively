@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { X } from '@phosphor-icons/react';
+import { X, Warning } from '@phosphor-icons/react';
 
 interface VerificationImageViewerProps {
   imageUrl: string;
@@ -16,6 +16,7 @@ export default function VerificationImageViewer({
   colorClass,
 }: VerificationImageViewerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   return (
     <>
@@ -24,24 +25,35 @@ export default function VerificationImageViewer({
           <h3 className="font-semibold">{title}</h3>
         </div>
         <div className="p-4">
-          <button
-            onClick={() => setIsOpen(true)}
-            className="block w-full relative h-48 rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
-          >
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          </button>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="text-gray-700 hover:text-gray-900 mt-3 inline-block text-sm font-medium"
-          >
-            View Full Size →
-          </button>
+          {imageError ? (
+            <div className="w-full h-48 bg-red-50 border-2 border-red-200 rounded-lg flex flex-col items-center justify-center text-red-600">
+              <Warning size={48} weight="duotone" className="mb-2" />
+              <p className="text-sm font-medium">Failed to load image</p>
+              <p className="text-xs text-red-500 mt-1 px-4 text-center break-all">{imageUrl}</p>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsOpen(true)}
+                className="block w-full relative h-48 rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
+              >
+                <Image
+                  src={imageUrl}
+                  alt={title}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                  onError={() => setImageError(true)}
+                />
+              </button>
+              <button
+                onClick={() => setIsOpen(true)}
+                className="text-gray-700 hover:text-gray-900 mt-3 inline-block text-sm font-medium"
+              >
+                View Full Size →
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -59,14 +71,23 @@ export default function VerificationImageViewer({
           </button>
 
           <div className="relative w-full h-full max-w-5xl max-h-[90vh] flex items-center justify-center">
-            <Image
-              src={imageUrl}
-              alt={title}
-              fill
-              className="object-contain"
-              onClick={(e) => e.stopPropagation()}
-              unoptimized
-            />
+            {imageError ? (
+              <div className="bg-white rounded-lg p-8 text-center">
+                <Warning size={64} weight="duotone" className="text-red-500 mx-auto mb-4" />
+                <p className="text-gray-900 font-semibold mb-2">Failed to load image</p>
+                <p className="text-sm text-gray-600 break-all max-w-md">{imageUrl}</p>
+              </div>
+            ) : (
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                className="object-contain"
+                onClick={(e) => e.stopPropagation()}
+                unoptimized
+                onError={() => setImageError(true)}
+              />
+            )}
           </div>
 
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-gray-900 px-6 py-3 rounded-full font-semibold shadow-lg">

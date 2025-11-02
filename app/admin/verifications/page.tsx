@@ -30,8 +30,8 @@ export default async function AdminVerificationsPage() {
     .from('verification_documents')
     .select(`
       *,
-      user:profiles!user_id(full_name, phone_number),
-      reviewer:profiles!reviewed_by(full_name)
+      user:profiles!verification_documents_user_id_fkey(full_name, phone_number),
+      reviewer:profiles!verification_documents_reviewed_by_fkey(full_name)
     `)
     .order('submitted_at', { ascending: false });
 
@@ -60,6 +60,14 @@ export default async function AdminVerificationsPage() {
                 </p>
               </div>
             </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <p className="font-semibold mb-1">Error loading verifications</p>
+                <p className="text-sm">{error.message}</p>
+              </div>
+            )}
 
             {/* Filter tabs */}
             <div className="flex gap-4 mb-6 border-b border-gray-200">

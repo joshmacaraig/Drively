@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import RenterNavigation from '@/components/renter/RenterNavigation';
 import BookingForm from '@/components/renter/BookingForm';
+import DiscountBadges from '@/components/renter/DiscountBadges';
 
 export default async function VehicleDetailPage({
   params,
@@ -301,6 +302,9 @@ export default async function VehicleDetailPage({
                   <span className="text-gray-600">/day</span>
                 </div>
               </div>
+
+              {/* Discount Badges */}
+              <DiscountBadges carId={car.id} />
 
               {/* Booking Form */}
               <BookingForm

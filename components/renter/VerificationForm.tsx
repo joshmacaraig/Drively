@@ -51,7 +51,7 @@ export default function VerificationForm({
       const filePath = `${path}/${fileName}`;
 
       const { error: uploadError, data } = await supabase.storage
-        .from('drively-storage')
+        .from('verification-documents')
         .upload(filePath, file);
 
       if (uploadError) {
@@ -61,7 +61,7 @@ export default function VerificationForm({
       // Get public URL
       const {
         data: { publicUrl },
-      } = supabase.storage.from('drively-storage').getPublicUrl(filePath);
+      } = supabase.storage.from('verification-documents').getPublicUrl(filePath);
 
       return publicUrl;
     } catch (error) {

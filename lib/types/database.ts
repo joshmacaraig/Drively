@@ -7,6 +7,10 @@ export type RentalStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'c
 
 export type ChecklistType = 'pickup' | 'return';
 
+export type PricingRuleType = 'duration_discount';
+
+export type DiscountType = 'percentage' | 'fixed';
+
 export interface Profile {
   id: string;
   full_name: string;
@@ -138,11 +142,24 @@ export interface Reminder {
   created_at: string;
 }
 
+export interface CarPricingRule {
+  id: string;
+  car_id: string;
+  rule_type: PricingRuleType;
+  min_days: number;
+  discount_type: DiscountType;
+  discount_value: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Computed types with relations
 export interface CarWithImages extends Car {
   images: CarImage[];
   owner: Profile;
   rentals?: Rental[];
+  pricing_rules?: CarPricingRule[];
 }
 
 export interface RentalWithDetails extends Rental {

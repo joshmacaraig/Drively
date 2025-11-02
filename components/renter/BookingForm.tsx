@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { createClient } from '@/lib/supabase/client';
+import { CarPricingRule } from '@/lib/types/database';
+import { calculateRentalPrice, formatDiscountDescription } from '@/lib/utils/pricing';
 
 interface Rental {
   id: string;
@@ -39,6 +42,7 @@ export default function BookingForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [pricingRules, setPricingRules] = useState<CarPricingRule[]>([]);
 
   const [startDate, setStartDate] = useState<Date | null>(
     initialStartDate ? new Date(initialStartDate) : null
@@ -49,12 +53,37 @@ export default function BookingForm({
   const [notes, setNotes] = useState('');
   const [conflictWarning, setConflictWarning] = useState('');
 
-  // Calculate total
+  // Load pricing rules
+  useEffect(() => {
+    const loadPricingRules = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('car_pricing_rules')
+          .select('*')
+          .eq('car_id', carId)
+          .eq('is_active', true)
+          .order('min_days', { ascending: true });
+
+        if (!error && data) {
+          setPricingRules(data);
+        }
+      } catch (err) {
+        console.error('Error loading pricing rules:', err);
+      }
+    };
+
+    loadPricingRules();
+  }, [carId]);
+
+  // Calculate total with discounts
   const totalDays =
     startDate && endDate
       ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       : 0;
-  const totalAmount = totalDays > 0 ? totalDays * dailyRate : 0;
+
+  const priceCalculation = calculateRentalPrice(dailyRate, totalDays, pricingRules);
+  const totalAmount = priceCalculation.finalPrice;
 
   // Check for conflicts
   useEffect(() => {
@@ -203,17 +232,38 @@ export default function BookingForm({
 
       {/* Days & Total Display */}
       {totalDays > 0 && (
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-50 rounded-lg p-4 space-y-2">
           <div className="flex justify-between items-center text-sm">
             <span className="text-gray-600">Duration:</span>
             <span className="font-semibold text-gray-900">
               {totalDays} day{totalDays !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="flex justify-between items-center text-sm mt-2">
-            <span className="text-gray-600">Total Amount:</span>
-            <span className="font-bold text-lg text-gray-900">
-              ₱{totalAmount.toLocaleString()}
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">
+              ₱{dailyRate.toLocaleString()} × {totalDays} day{totalDays !== 1 ? 's' : ''}:
+            </span>
+            <span className="font-semibold text-gray-900">
+              ₱{priceCalculation.basePrice.toLocaleString()}
+            </span>
+          </div>
+          {priceCalculation.appliedRule && (
+            <>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-green-600 font-medium">
+                  {formatDiscountDescription(priceCalculation.appliedRule)}:
+                </span>
+                <span className="font-semibold text-green-600">
+                  -₱{priceCalculation.discount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="pt-2 border-t border-gray-300"></div>
+            </>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-gray-900 font-semibold">Total Amount:</span>
+            <span className="font-bold text-xl text-gray-900">
+              ₱{totalAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
         </div>

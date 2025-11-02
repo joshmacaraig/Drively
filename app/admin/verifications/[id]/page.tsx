@@ -61,7 +61,26 @@ export default async function VerificationDetailPage({
     );
   }
 
-  const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/';
+  // Helper function to construct full storage URL from path
+  const getStorageUrl = (path: string | null) => {
+    if (!path) return null;
+
+    // If it's already a full URL, return as is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    // Otherwise, construct the full URL
+    // Use verification-documents bucket for verification files
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const storageBucket = 'verification-documents';
+    return `${supabaseUrl}/storage/v1/object/public/${storageBucket}/${path}`;
+  };
+
+  // Get full URLs for documents
+  const proofOfIdUrl = getStorageUrl(verification.philsys_id_url);
+  const proofOfAddressUrl = getStorageUrl(verification.proof_of_address_url);
+  const driversLicenseUrl = getStorageUrl(verification.drivers_license_url);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -165,38 +184,36 @@ export default async function VerificationDetailPage({
               Submitted Documents
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
-              {verification.philsys_id_url && (
+              {proofOfIdUrl && (
                 <VerificationImageViewer
-                  imageUrl={verification.philsys_id_url}
+                  imageUrl={proofOfIdUrl}
                   title="Proof of ID"
                   colorClass="bg-blue-50 text-blue-700"
                 />
               )}
 
-              {verification.drivers_license_url && (
+              {driversLicenseUrl && (
                 <VerificationImageViewer
-                  imageUrl={verification.drivers_license_url}
+                  imageUrl={driversLicenseUrl}
                   title="Driver's License"
                   colorClass="bg-green-50 text-green-700"
                 />
               )}
 
-              {verification.proof_of_address_url && (
+              {proofOfAddressUrl && (
                 <VerificationImageViewer
-                  imageUrl={verification.proof_of_address_url}
+                  imageUrl={proofOfAddressUrl}
                   title="Proof of Address"
                   colorClass="bg-purple-50 text-purple-700"
                 />
               )}
             </div>
 
-            {!verification.philsys_id_url &&
-              !verification.drivers_license_url &&
-              !verification.proof_of_address_url && (
-                <div className="text-center py-12 text-gray-500">
-                  No documents submitted
-                </div>
-              )}
+            {!proofOfIdUrl && !driversLicenseUrl && !proofOfAddressUrl && (
+              <div className="text-center py-12 text-gray-500">
+                No documents submitted
+              </div>
+            )}
           </div>
 
           {/* Review History */}

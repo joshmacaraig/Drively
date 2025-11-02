@@ -21,6 +21,7 @@ import {
   CheckCircle,
   FloppyDisk
 } from '@phosphor-icons/react';
+import PricingRulesManager from '@/components/owner/PricingRulesManager';
 
 export default function EditCarPage() {
   const params = useParams();
@@ -693,6 +694,11 @@ export default function EditCarPage() {
               </button>
             </div>
           </form>
+
+          {/* Pricing Rules Manager (separate section below the form) */}
+          <div className="mt-6">
+            <PricingRulesManager carId={carId} dailyRate={parseFloat(dailyRate) || 0} />
+          </div>
         </div>
       </div>
     </div>
