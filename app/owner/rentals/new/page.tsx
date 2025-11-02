@@ -25,6 +25,8 @@ import {
 } from '@phosphor-icons/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { creatingQuotes } from '@/lib/loadingQuotes';
+import { CarPricingRule } from '@/lib/types/database';
+import { calculateRentalPrice, formatDiscountDescription } from '@/lib/utils/pricing';
 
 export default function NewBookingPage() {
   const router = useRouter();
@@ -33,6 +35,7 @@ export default function NewBookingPage() {
   const [cars, setCars] = useState<any[]>([]);
   const [conflictWarning, setConflictWarning] = useState('');
   const [checkingConflict, setCheckingConflict] = useState(false);
+  const [pricingRules, setPricingRules] = useState<CarPricingRule[]>([]);
 
   // Form state
   const [carId, setCarId] = useState('');
@@ -57,7 +60,7 @@ export default function NewBookingPage() {
 
   useEffect(() => {
     calculateTotal();
-  }, [carId, startDateTime, endDateTime]);
+  }, [carId, startDateTime, endDateTime, pricingRules]);
 
   useEffect(() => {
     checkConflict();
@@ -66,8 +69,10 @@ export default function NewBookingPage() {
   useEffect(() => {
     if (carId) {
       loadCarBookings(carId);
+      loadPricingRules(carId);
     } else {
       setCarBookings([]);
+      setPricingRules([]);
     }
   }, [carId]);
 
@@ -109,9 +114,28 @@ export default function NewBookingPage() {
     const days = Math.ceil((endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60 * 24));
 
     if (days > 0) {
-      const total = days * parseFloat(selectedCar.daily_rate);
-      setTotalAmount(total);
-      setDailyRate(parseFloat(selectedCar.daily_rate));
+      const dailyRateValue = parseFloat(selectedCar.daily_rate);
+      const priceCalculation = calculateRentalPrice(dailyRateValue, days, pricingRules);
+      setTotalAmount(priceCalculation.finalPrice);
+      setDailyRate(dailyRateValue);
+    }
+  };
+
+  const loadPricingRules = async (selectedCarId: string) => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('car_pricing_rules')
+        .select('*')
+        .eq('car_id', selectedCarId)
+        .eq('is_active', true)
+        .order('min_days', { ascending: true });
+
+      if (!error && data) {
+        setPricingRules(data);
+      }
+    } catch (err) {
+      console.error('Error loading pricing rules:', err);
     }
   };
 
@@ -1032,25 +1056,36 @@ export default function NewBookingPage() {
               )}
 
               {/* Duration Summary */}
-              {startDateTime && endDateTime && getDays() > 0 && !conflictWarning && (
-                <div className="mt-4 p-4 bg-primary-50 rounded-lg">
-                  <p className="text-sm text-secondary-900 font-semibold mb-2">Booking Summary</p>
-                  <p className="text-sm text-secondary-600">
-                    <strong>Start:</strong> {formatDateTime(startDateTime)}
-                  </p>
-                  <p className="text-sm text-secondary-600 mt-1">
-                    <strong>End:</strong> {formatDateTime(endDateTime)}
-                  </p>
-                  <p className="text-sm text-secondary-600 mt-2">
-                    <strong>Duration:</strong> {getDays()} day{getDays() !== 1 ? 's' : ''}
-                  </p>
-                  {dailyRate > 0 && (
-                    <p className="text-sm text-secondary-600 mt-1">
-                      <strong>Rate:</strong> ₱{dailyRate.toLocaleString()} × {getDays()} day{getDays() !== 1 ? 's' : ''}
+              {startDateTime && endDateTime && getDays() > 0 && !conflictWarning && (() => {
+                const days = getDays();
+                const priceCalc = calculateRentalPrice(dailyRate, days, pricingRules);
+                return (
+                  <div className="mt-4 p-4 bg-primary-50 rounded-lg">
+                    <p className="text-sm text-secondary-900 font-semibold mb-2">Booking Summary</p>
+                    <p className="text-sm text-secondary-600">
+                      <strong>Start:</strong> {formatDateTime(startDateTime)}
                     </p>
-                  )}
-                </div>
-              )}
+                    <p className="text-sm text-secondary-600 mt-1">
+                      <strong>End:</strong> {formatDateTime(endDateTime)}
+                    </p>
+                    <p className="text-sm text-secondary-600 mt-2">
+                      <strong>Duration:</strong> {days} day{days !== 1 ? 's' : ''}
+                    </p>
+                    {dailyRate > 0 && (
+                      <>
+                        <p className="text-sm text-secondary-600 mt-1">
+                          <strong>Base Rate:</strong> ₱{dailyRate.toLocaleString()} × {days} day{days !== 1 ? 's' : ''} = ₱{priceCalc.basePrice.toLocaleString()}
+                        </p>
+                        {priceCalc.appliedRule && (
+                          <p className="text-sm text-green-600 font-semibold mt-1">
+                            <strong>Discount:</strong> {formatDiscountDescription(priceCalc.appliedRule)} = -₱{priceCalc.discount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Notes */}
@@ -1070,24 +1105,38 @@ export default function NewBookingPage() {
             </div>
 
             {/* Total Amount */}
-            {totalAmount > 0 && (
-              <div className="mb-8 p-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-2xl">
-                <div className="flex items-center gap-4">
-                  <div className="bg-white rounded-full p-4">
-                    <CurrencyCircleDollar size={40} weight="fill" className="text-primary-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-white font-semibold opacity-90">Total Revenue</p>
-                    <p className="text-4xl font-bold text-white mb-1">
-                      ₱{totalAmount.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-white opacity-80">
-                      {getDays()} day{getDays() !== 1 ? 's' : ''} × ₱{dailyRate.toLocaleString()}/day
-                    </p>
+            {totalAmount > 0 && (() => {
+              const days = getDays();
+              const priceCalc = calculateRentalPrice(dailyRate, days, pricingRules);
+              return (
+                <div className="mb-8 p-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-2xl">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white rounded-full p-4">
+                      <CurrencyCircleDollar size={40} weight="fill" className="text-primary-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-white font-semibold opacity-90">Total Revenue</p>
+                      <p className="text-4xl font-bold text-white mb-1">
+                        ₱{totalAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs text-white opacity-80">
+                        {days} day{days !== 1 ? 's' : ''} × ₱{dailyRate.toLocaleString()}/day
+                        {priceCalc.appliedRule && (
+                          <span className="ml-2 bg-green-400 text-green-900 px-2 py-0.5 rounded-full font-bold">
+                            {priceCalc.discountPercentage.toFixed(0)}% off applied!
+                          </span>
+                        )}
+                      </p>
+                      {priceCalc.appliedRule && (
+                        <p className="text-xs text-white opacity-90 mt-2 line-through">
+                          Original: ₱{priceCalc.basePrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Submit Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
