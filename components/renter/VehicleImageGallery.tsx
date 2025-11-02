@@ -71,6 +71,7 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               priority
+              unoptimized
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300 flex items-center justify-center">
               <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -98,6 +99,7 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
                       fill
                       sizes="(max-width: 768px) 25vw, 150px"
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
                   </div>
@@ -166,6 +168,7 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
                 fill
                 sizes="100vw"
                 className="object-contain"
+                unoptimized
               />
             </div>
 
