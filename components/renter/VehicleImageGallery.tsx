@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { X, CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 interface VehicleImageGalleryProps {
@@ -64,12 +63,10 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
             className="relative aspect-[16/10] overflow-hidden rounded-lg cursor-pointer group bg-gray-100"
             onClick={() => openImageViewer(images[0].image_url, 0)}
           >
-            <Image
+            <img
               src={images[0].image_url}
               alt={carName}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              priority
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-white bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300 flex items-center justify-center">
               <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -91,11 +88,10 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
                     className="relative aspect-square overflow-hidden rounded-lg cursor-pointer group bg-gray-100"
                     onClick={() => openImageViewer(image.image_url, actualIndex)}
                   >
-                    <Image
+                    <img
                       src={image.image_url}
                       alt={`${carName} ${actualIndex + 1}`}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-white bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
                   </div>
@@ -157,12 +153,11 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
 
           {/* Image */}
           <div className="max-w-7xl max-h-[90vh] w-full h-full flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <div className="relative w-full h-full">
-              <Image
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img
                 src={selectedImage}
                 alt={`${carName} full size`}
-                fill
-                className="object-contain"
+                className="max-w-full max-h-full object-contain"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
