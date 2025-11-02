@@ -3,8 +3,19 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function AdminRentalsPage() {
+const ITEMS_PER_PAGE = 20;
+
+export default async function AdminRentalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam || '1'));
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const supabase = await createClient();
 
   const {
@@ -26,7 +37,12 @@ export default async function AdminRentalsPage() {
     redirect('/');
   }
 
-  // Fetch all rentals with related data
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('rentals')
+    .select('*', { count: 'exact', head: true });
+
+  // Fetch rentals with pagination
   const { data: rentals, error } = await supabase
     .from('rentals')
     .select(`
@@ -35,7 +51,10 @@ export default async function AdminRentalsPage() {
       renter:profiles!renter_id(full_name, phone_number),
       owner:profiles!owner_id(full_name, phone_number)
     `)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
 
   if (error) {
     console.error('Error fetching rentals:', error);
@@ -53,13 +72,12 @@ export default async function AdminRentalsPage() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-secondary-900">
-                  Manage Rentals
-                </h1>
-                <p className="text-secondary-600 mt-1">
-                  View and manage all rental transactions
-                </p>
-              </div>
+              <h1 className="text-3xl font-bold text-secondary-900">
+                Manage Rentals
+              </h1>
+              <p className="text-secondary-600 mt-1">
+                View and manage all rental transactions
+              </p>
             </div>
 
             <div className="overflow-x-auto">
@@ -178,9 +196,13 @@ export default async function AdminRentalsPage() {
               </table>
             </div>
 
-            <div className="mt-6 text-secondary-600">
-              Total Rentals: {rentals?.length || 0}
-            </div>
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           </div>
         </div>
       </div>

@@ -2,8 +2,19 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function AdminUsersPage() {
+const ITEMS_PER_PAGE = 20;
+
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam || '1'));
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const supabase = await createClient();
 
   const {
@@ -25,11 +36,19 @@ export default async function AdminUsersPage() {
     redirect('/');
   }
 
-  // Fetch all users
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true });
+
+  // Fetch users with pagination
   const { data: users, error } = await supabase
     .from('profiles')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
 
   if (error) {
     console.error('Error fetching users:', error);
@@ -149,9 +168,13 @@ export default async function AdminUsersPage() {
               </table>
             </div>
 
-            <div className="mt-6 text-secondary-600">
-              Total Users: {users?.length || 0}
-            </div>
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           </div>
         </div>
       </div>

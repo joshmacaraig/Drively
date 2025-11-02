@@ -2,8 +2,19 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function AdminCarsPage() {
+const ITEMS_PER_PAGE = 20;
+
+export default async function AdminCarsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam || '1'));
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const supabase = await createClient();
 
   const {
@@ -25,14 +36,22 @@ export default async function AdminCarsPage() {
     redirect('/');
   }
 
-  // Fetch all cars with owner information
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('cars')
+    .select('*', { count: 'exact', head: true });
+
+  // Fetch cars with pagination
   const { data: cars, error } = await supabase
     .from('cars')
     .select(`
       *,
       owner:profiles!owner_id(full_name, phone_number)
     `)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
 
   if (error) {
     console.error('Error fetching cars:', error);
@@ -152,9 +171,13 @@ export default async function AdminCarsPage() {
               </table>
             </div>
 
-            <div className="mt-6 text-secondary-600">
-              Total Cars: {cars?.length || 0}
-            </div>
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           </div>
         </div>
       </div>

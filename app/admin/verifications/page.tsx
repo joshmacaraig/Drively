@@ -3,8 +3,19 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function AdminVerificationsPage() {
+const ITEMS_PER_PAGE = 20;
+
+export default async function AdminVerificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam || '1'));
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const supabase = await createClient();
 
   const {
@@ -26,7 +37,12 @@ export default async function AdminVerificationsPage() {
     redirect('/');
   }
 
-  // Fetch all verification documents with user information
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('verification_documents')
+    .select('*', { count: 'exact', head: true });
+
+  // Fetch verification documents with pagination
   const { data: verifications, error } = await supabase
     .from('verification_documents')
     .select(`
@@ -34,7 +50,10 @@ export default async function AdminVerificationsPage() {
       user:profiles!verification_documents_user_id_fkey(full_name, phone_number),
       reviewer:profiles!verification_documents_reviewed_by_fkey(full_name)
     `)
-    .order('submitted_at', { ascending: false });
+    .order('submitted_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
 
   if (error) {
     console.error('Error fetching verifications:', error);
@@ -187,23 +206,13 @@ export default async function AdminVerificationsPage() {
               </table>
             </div>
 
-            <div className="mt-6 flex items-center justify-between text-gray-600">
-              <div>Total Verifications: {verifications?.length || 0}</div>
-              <div className="flex gap-4">
-                <div>
-                  Pending:{' '}
-                  {verifications?.filter((v) => v.status === 'pending').length || 0}
-                </div>
-                <div>
-                  Approved:{' '}
-                  {verifications?.filter((v) => v.status === 'approved').length || 0}
-                </div>
-                <div>
-                  Rejected:{' '}
-                  {verifications?.filter((v) => v.status === 'rejected').length || 0}
-                </div>
-              </div>
-            </div>
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           </div>
         </div>
       </div>
