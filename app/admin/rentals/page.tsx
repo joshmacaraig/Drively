@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import AdminNavigation from '@/components/admin/AdminNavigation';
 
 export default async function AdminRentalsPage() {
   const supabase = await createClient();
@@ -42,17 +43,16 @@ export default async function AdminRentalsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
-      <div className="container mx-auto px-4 py-8">
+      {/* Navigation */}
+      <AdminNavigation
+        userFullName={profile?.full_name}
+        userAvatar={profile?.avatar_url}
+      />
+
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <Link
-                  href="/admin/dashboard"
-                  className="text-primary-500 hover:text-primary-600 mb-2 inline-block"
-                >
-                  ← Back to Dashboard
-                </Link>
+            <div className="mb-8">
                 <h1 className="text-3xl font-bold text-secondary-900">
                   Manage Rentals
                 </h1>

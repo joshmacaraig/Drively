@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import AdminNavigation from '@/components/admin/AdminNavigation';
 
 export default async function AdminVerificationsPage() {
   const supabase = await createClient();
@@ -41,24 +42,22 @@ export default async function AdminVerificationsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      {/* Navigation */}
+      <AdminNavigation
+        userFullName={profile?.full_name}
+        userAvatar={profile?.avatar_url}
+      />
+
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <Link
-                  href="/admin/dashboard"
-                  className="text-gray-700 hover:text-gray-900 mb-2 inline-block font-medium"
-                >
-                  ← Back to Dashboard
-                </Link>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  User Verifications
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Review and manage user verification requests
-                </p>
-              </div>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">
+                User Verifications
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Review and manage user verification requests
+              </p>
             </div>
 
             {/* Error Display */}

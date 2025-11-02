@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import VerificationReviewForm from '@/components/admin/VerificationReviewForm';
 import VerificationImageViewer from '@/components/admin/VerificationImageViewer';
+import AdminNavigation from '@/components/admin/AdminNavigation';
 
 export default async function VerificationDetailPage({
   params,
@@ -84,7 +85,13 @@ export default async function VerificationDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Navigation */}
+      <AdminNavigation
+        userFullName={profile?.full_name}
+        userAvatar={profile?.avatar_url}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         <Link
           href="/admin/verifications"
           className="inline-flex items-center text-gray-700 hover:text-gray-900 mb-6 font-medium"
