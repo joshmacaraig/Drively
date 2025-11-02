@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import RenterNavigation from '@/components/renter/RenterNavigation';
+import { calculateRentalPrice, formatDiscountDescription } from '@/lib/utils/pricing';
 
 export default async function BookingDetailPage({
   params,
@@ -62,6 +63,14 @@ export default async function BookingDetailPage({
   if (error || !booking) {
     notFound();
   }
+
+  // Load pricing rules for the car
+  const { data: pricingRules } = await supabase
+    .from('car_pricing_rules')
+    .select('*')
+    .eq('car_id', booking.car_id)
+    .eq('is_active', true)
+    .order('min_days', { ascending: true });
 
   const car = booking.cars;
   const owner = booking.profiles;
@@ -289,12 +298,52 @@ export default async function BookingDetailPage({
               </h2>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-900 font-semibold">Total Amount:</span>
-                  <span className="font-bold text-2xl text-gray-900">
-                    ₱{Number(booking.total_amount).toLocaleString()}
-                  </span>
-                </div>
+                {(() => {
+                  const dailyRate = Number(car?.daily_rate || 0);
+                  const priceCalc = calculateRentalPrice(dailyRate, totalDays, pricingRules || []);
+
+                  return (
+                    <>
+                      {priceCalc.appliedRule && (
+                        <>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Daily Rate</span>
+                            <span className="text-gray-900 font-semibold">
+                              ₱{dailyRate.toLocaleString()} × {totalDays} days
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Subtotal</span>
+                            <span className="text-gray-900 font-semibold">
+                              ₱{priceCalc.basePrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm pb-3 border-b border-gray-200">
+                            <span className="text-green-600 font-semibold">
+                              Discount ({formatDiscountDescription(priceCalc.appliedRule)})
+                            </span>
+                            <span className="text-green-600 font-bold">
+                              -₱{priceCalc.discount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-900 font-semibold">Total Amount:</span>
+                        <span className="font-bold text-2xl text-gray-900">
+                          ₱{Number(booking.total_amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      {priceCalc.appliedRule && (
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                          <p className="text-xs text-green-800 font-semibold">
+                            🎉 You saved ₱{priceCalc.discount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({priceCalc.discountPercentage.toFixed(0)}% discount)!
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex items-center justify-between mb-2">
@@ -307,9 +356,6 @@ export default async function BookingDetailPage({
                       {(booking.payment_status || 'pending').charAt(0).toUpperCase() + (booking.payment_status || 'pending').slice(1)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Daily rate: ₱{Number(car?.daily_rate || 0).toLocaleString()}
-                  </p>
                 </div>
               </div>
             </div>
