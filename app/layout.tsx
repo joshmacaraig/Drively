@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Sora } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastContainer";
 import NavigationLoader from "@/components/ui/NavigationLoader";
@@ -33,7 +34,9 @@ export default function RootLayout({
         className={`${poppins.variable} ${sora.variable} antialiased`}
       >
         <ToastProvider>
-          <NavigationLoader />
+          <Suspense fallback={null}>
+            <NavigationLoader />
+          </Suspense>
           {children}
         </ToastProvider>
       </body>
