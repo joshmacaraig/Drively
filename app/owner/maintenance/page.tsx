@@ -154,90 +154,92 @@ export default async function MaintenancePage({
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {maintenanceRecords.map((record: any) => (
-                <div
-                  key={record.id}
-                  className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
-                >
-                  <div className="p-4 md:p-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <h3 className="text-lg md:text-xl font-bold text-secondary-900">
-                            {record.car?.year} {record.car?.make} {record.car?.model}
-                          </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getMaintenanceTypeColor(record.maintenance_type)}`}>
-                            {record.maintenance_type.charAt(0).toUpperCase() + record.maintenance_type.slice(1)}
-                          </span>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(record.status)}`}>
-                            {record.status.charAt(0).toUpperCase() + record.status.slice(1).replace('_', ' ')}
-                          </span>
+            <>
+              <div className="space-y-4">
+                {maintenanceRecords.map((record: any) => (
+                  <div
+                    key={record.id}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
+                  >
+                    <div className="p-4 md:p-6">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="text-lg md:text-xl font-bold text-secondary-900">
+                              {record.car?.year} {record.car?.make} {record.car?.model}
+                            </h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getMaintenanceTypeColor(record.maintenance_type)}`}>
+                              {record.maintenance_type.charAt(0).toUpperCase() + record.maintenance_type.slice(1)}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(record.status)}`}>
+                              {record.status.charAt(0).toUpperCase() + record.status.slice(1).replace('_', ' ')}
+                            </span>
+                          </div>
+                          <p className="text-sm text-secondary-600">{record.car?.plate_number}</p>
                         </div>
-                        <p className="text-sm text-secondary-600">{record.car?.plate_number}</p>
+                        <div className="text-left sm:text-right">
+                          {record.cost && (
+                            <p className="text-xl md:text-2xl font-bold text-primary-500">
+                              ₱{parseFloat(record.cost).toLocaleString()}
+                            </p>
+                          )}
+                          <p className="text-xs md:text-sm text-secondary-600">
+                            {new Date(record.maintenance_date).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-left sm:text-right">
-                        {record.cost && (
-                          <p className="text-xl md:text-2xl font-bold text-primary-500">
-                            ₱{parseFloat(record.cost).toLocaleString()}
+
+                      <div className="mb-4">
+                        <p className="font-semibold text-secondary-900 mb-1">{record.description}</p>
+                        {record.service_provider && (
+                          <p className="text-sm text-secondary-600">
+                            <strong>Service Provider:</strong> {record.service_provider}
                           </p>
                         )}
-                        <p className="text-xs md:text-sm text-secondary-600">
-                          {new Date(record.maintenance_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </p>
+                        {record.mileage && (
+                          <p className="text-sm text-secondary-600">
+                            <strong>Mileage:</strong> {record.mileage.toLocaleString()} km
+                          </p>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="mb-4">
-                      <p className="font-semibold text-secondary-900 mb-1">{record.description}</p>
-                      {record.service_provider && (
-                        <p className="text-sm text-secondary-600">
-                          <strong>Service Provider:</strong> {record.service_provider}
-                        </p>
+                      {record.notes && (
+                        <div className="bg-secondary-50 rounded-lg p-3">
+                          <p className="text-sm text-secondary-600">
+                            <strong>Notes:</strong> {record.notes}
+                          </p>
+                        </div>
                       )}
-                      {record.mileage && (
-                        <p className="text-sm text-secondary-600">
-                          <strong>Mileage:</strong> {record.mileage.toLocaleString()} km
-                        </p>
+
+                      {record.next_maintenance_date && (
+                        <div className="mt-4 pt-4 border-t border-secondary-200">
+                          <p className="text-sm text-secondary-600">
+                            <CalendarBlank size={16} weight="duotone" className="inline mr-1" />
+                            Next maintenance due: {new Date(record.next_maintenance_date).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
                       )}
                     </div>
-
-                    {record.notes && (
-                      <div className="bg-secondary-50 rounded-lg p-3">
-                        <p className="text-sm text-secondary-600">
-                          <strong>Notes:</strong> {record.notes}
-                        </p>
-                      </div>
-                    )}
-
-                    {record.next_maintenance_date && (
-                      <div className="mt-4 pt-4 border-t border-secondary-200">
-                        <p className="text-sm text-secondary-600">
-                          <CalendarBlank size={16} weight="duotone" className="inline mr-1" />
-                          Next maintenance due: {new Date(record.next_maintenance_date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    )}
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Pagination */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalCount || 0}
-              itemsPerPage={ITEMS_PER_PAGE}
-            />
+              {/* Pagination */}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalCount || 0}
+                itemsPerPage={ITEMS_PER_PAGE}
+              />
+            </>
           )}
 
           {/* Back to Dashboard */}

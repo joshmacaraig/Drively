@@ -671,126 +671,128 @@ function OwnerRentalsPageContent() {
               </div>
             </div>
           ) : (
-            /* List View */
-            <div className="space-y-4">
-              {filteredRentals.map((rental: any) => (
-                <div
-                  key={rental.id}
-                  className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
-                >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-bold text-secondary-900">
-                            {rental.car?.make} {rental.car?.model}
-                          </h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border-2 ${getStatusColor(rental.status)}`}>
-                            {getStatusText(rental.status)}
-                          </span>
-                        </div>
-                        <p className="text-secondary-600 text-sm">{rental.car?.plate_number}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-primary-500">
-                          ₱{parseFloat(rental.total_amount).toLocaleString()}
-                        </p>
-                        <p className="text-sm text-secondary-600">Total</p>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-4 mb-4">
-                      <div className="flex items-center gap-2">
-                        <User size={20} weight="duotone" className="text-secondary-400" />
+            <>
+              {/* List View */}
+              <div className="space-y-4">
+                {filteredRentals.map((rental: any) => (
+                  <div
+                    key={rental.id}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <p className="text-sm text-secondary-600">
-                            Renter
-                            {rental.is_manual_booking && (
-                              <span className="ml-1 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
-                                Guest
-                              </span>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-xl font-bold text-secondary-900">
+                              {rental.car?.make} {rental.car?.model}
+                            </h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border-2 ${getStatusColor(rental.status)}`}>
+                              {getStatusText(rental.status)}
+                            </span>
+                          </div>
+                          <p className="text-secondary-600 text-sm">{rental.car?.plate_number}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary-500">
+                            ₱{parseFloat(rental.total_amount).toLocaleString()}
+                          </p>
+                          <p className="text-sm text-secondary-600">Total</p>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <User size={20} weight="duotone" className="text-secondary-400" />
+                          <div className="flex-1">
+                            <p className="text-sm text-secondary-600">
+                              Renter
+                              {rental.is_manual_booking && (
+                                <span className="ml-1 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                                  Guest
+                                </span>
+                              )}
+                            </p>
+                            <p className="font-semibold text-secondary-900">
+                              {rental.is_manual_booking
+                                ? rental.guest_renter_name || 'Guest Renter'
+                                : rental.renter?.full_name || 'N/A'
+                              }
+                            </p>
+                            {rental.is_manual_booking && rental.guest_renter_phone && (
+                              <p className="text-xs text-secondary-600">{rental.guest_renter_phone}</p>
                             )}
-                          </p>
-                          <p className="font-semibold text-secondary-900">
-                            {rental.is_manual_booking
-                              ? rental.guest_renter_name || 'Guest Renter'
-                              : rental.renter?.full_name || 'N/A'
-                            }
-                          </p>
-                          {rental.is_manual_booking && rental.guest_renter_phone && (
-                            <p className="text-xs text-secondary-600">{rental.guest_renter_phone}</p>
-                          )}
-                          {rental.is_manual_booking && rental.guest_renter_facebook && (
-                            <a
-                              href={rental.guest_renter_facebook}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-1"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                              </svg>
-                              Facebook Profile
-                            </a>
-                          )}
+                            {rental.is_manual_booking && rental.guest_renter_facebook && (
+                              <a
+                                href={rental.guest_renter_facebook}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-1"
+                              >
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                Facebook Profile
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <CalendarBlank size={20} weight="duotone" className="text-secondary-400" />
+                          <div>
+                            <p className="text-sm text-secondary-600">Start</p>
+                            <p className="font-semibold text-secondary-900">
+                              {new Date(rental.start_datetime).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <CalendarBlank size={20} weight="duotone" className="text-secondary-400" />
+                          <div>
+                            <p className="text-sm text-secondary-600">End</p>
+                            <p className="font-semibold text-secondary-900">
+                              {new Date(rental.end_datetime).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <CalendarBlank size={20} weight="duotone" className="text-secondary-400" />
-                        <div>
-                          <p className="text-sm text-secondary-600">Start</p>
-                          <p className="font-semibold text-secondary-900">
-                            {new Date(rental.start_datetime).toLocaleDateString()}
+                      {rental.notes && (
+                        <div className="bg-secondary-50 rounded-lg p-3 mb-4">
+                          <p className="text-sm text-secondary-600">
+                            <strong>Notes:</strong> {rental.notes}
                           </p>
                         </div>
-                      </div>
+                      )}
 
-                      <div className="flex items-center gap-2">
-                        <CalendarBlank size={20} weight="duotone" className="text-secondary-400" />
-                        <div>
-                          <p className="text-sm text-secondary-600">End</p>
-                          <p className="font-semibold text-secondary-900">
-                            {new Date(rental.end_datetime).toLocaleDateString()}
-                          </p>
-                        </div>
+                      <div className="flex gap-3 pt-4 border-t border-secondary-200">
+                        <button
+                          onClick={() => openManageModal(rental)}
+                          className="flex-1 text-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all shadow-lg"
+                        >
+                          Manage Booking
+                        </button>
+                        <Link
+                          href={`/owner/rentals/${rental.id}`}
+                          className="flex-1 text-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-colors"
+                        >
+                          View Details
+                        </Link>
                       </div>
-                    </div>
-
-                    {rental.notes && (
-                      <div className="bg-secondary-50 rounded-lg p-3 mb-4">
-                        <p className="text-sm text-secondary-600">
-                          <strong>Notes:</strong> {rental.notes}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-4 border-t border-secondary-200">
-                      <button
-                        onClick={() => openManageModal(rental)}
-                        className="flex-1 text-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all shadow-lg"
-                      >
-                        Manage Booking
-                      </button>
-                      <Link
-                        href={`/owner/rentals/${rental.id}`}
-                        className="flex-1 text-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-colors"
-                      >
-                        View Details
-                      </Link>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Pagination */}
-            <Pagination
-              currentPage={parseInt(searchParams.get('page') || '1')}
-              totalPages={Math.ceil(totalCount / ITEMS_PER_PAGE)}
-              totalItems={totalCount}
-              itemsPerPage={ITEMS_PER_PAGE}
-            />
+              {/* Pagination */}
+              <Pagination
+                currentPage={parseInt(searchParams.get('page') || '1')}
+                totalPages={Math.ceil(totalCount / ITEMS_PER_PAGE)}
+                totalItems={totalCount}
+                itemsPerPage={ITEMS_PER_PAGE}
+              />
+            </>
           )}
 
           {/* Back to Dashboard */}

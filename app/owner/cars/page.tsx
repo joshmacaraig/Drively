@@ -166,91 +166,93 @@ export default async function OwnerCarsPage({
               </Link>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              {cars.map((car: any) => {
-                const primaryImage = car.car_images?.find((img: any) => img.is_primary);
-                const displayImage = primaryImage || car.car_images?.[0];
+            <>
+              <div className="grid md:grid-cols-2 gap-6">
+                {cars.map((car: any) => {
+                  const primaryImage = car.car_images?.find((img: any) => img.is_primary);
+                  const displayImage = primaryImage || car.car_images?.[0];
 
-                return (
-                  <div
-                    key={car.id}
-                    className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
-                  >
-                    {/* Car Image */}
-                    <div className="relative h-48 bg-gradient-to-br from-primary-100 to-primary-200">
-                      {displayImage ? (
-                        <Image
-                          src={displayImage.image_url}
-                          alt={`${car.make} ${car.model}`}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Car size={64} weight="duotone" className="text-primary-500" />
+                  return (
+                    <div
+                      key={car.id}
+                      className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
+                    >
+                      {/* Car Image */}
+                      <div className="relative h-48 bg-gradient-to-br from-primary-100 to-primary-200">
+                        {displayImage ? (
+                          <Image
+                            src={displayImage.image_url}
+                            alt={`${car.make} ${car.model}`}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Car size={64} weight="duotone" className="text-primary-500" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Car Details */}
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-secondary-900">
+                              {car.make} {car.model}
+                            </h3>
+                            <p className="text-secondary-600">{car.year} • {car.plate_number}</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(car.status)}`}>
+                            {getStatusText(car.status)}
+                          </span>
                         </div>
-                      )}
-                    </div>
 
-                  {/* Car Details */}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-secondary-900">
-                          {car.make} {car.model}
-                        </h3>
-                        <p className="text-secondary-600">{car.year} • {car.plate_number}</p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(car.status)}`}>
-                        {getStatusText(car.status)}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-secondary-600">
-                        <GearSix size={16} weight="duotone" />
-                        {car.transmission}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-secondary-600">
-                        <Users size={16} weight="duotone" />
-                        {car.seats} seats
-                      </div>
-                      {car.location && (
-                        <div className="flex items-center gap-2 text-sm text-secondary-600 col-span-2">
-                          <MapPin size={16} weight="duotone" />
-                          {car.location}
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div className="flex items-center gap-2 text-sm text-secondary-600">
+                            <GearSix size={16} weight="duotone" />
+                            {car.transmission}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-secondary-600">
+                            <Users size={16} weight="duotone" />
+                            {car.seats} seats
+                          </div>
+                          {car.location && (
+                            <div className="flex items-center gap-2 text-sm text-secondary-600 col-span-2">
+                              <MapPin size={16} weight="duotone" />
+                              {car.location}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-secondary-200">
-                      <div className="flex items-center gap-2">
-                        <CurrencyCircleDollar size={20} weight="duotone" className="text-primary-500" />
-                        <span className="text-2xl font-bold text-primary-500">
-                          ₱{parseFloat(car.daily_rate).toLocaleString()}
-                        </span>
-                        <span className="text-sm text-secondary-600">/day</span>
+                        <div className="flex items-center justify-between pt-4 border-t border-secondary-200">
+                          <div className="flex items-center gap-2">
+                            <CurrencyCircleDollar size={20} weight="duotone" className="text-primary-500" />
+                            <span className="text-2xl font-bold text-primary-500">
+                              ₱{parseFloat(car.daily_rate).toLocaleString()}
+                            </span>
+                            <span className="text-sm text-secondary-600">/day</span>
+                          </div>
+                          <Link
+                            href={`/owner/cars/${car.id}`}
+                            className="text-primary-500 hover:text-primary-600 font-semibold transition-colors"
+                          >
+                            View Details →
+                          </Link>
+                        </div>
                       </div>
-                      <Link
-                        href={`/owner/cars/${car.id}`}
-                        className="text-primary-500 hover:text-primary-600 font-semibold transition-colors"
-                      >
-                        View Details →
-                      </Link>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
 
-            {/* Pagination */}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalCount || 0}
-              itemsPerPage={ITEMS_PER_PAGE}
-            />
+              {/* Pagination */}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalCount || 0}
+                itemsPerPage={ITEMS_PER_PAGE}
+              />
+            </>
           )}
 
           {/* Back to Dashboard */}
