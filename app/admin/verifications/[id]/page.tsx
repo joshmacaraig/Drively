@@ -36,7 +36,7 @@ export default async function VerificationDetailPage({
   // Fetch profile details (new verification system)
   const { data: verification, error } = await supabase
     .from('profiles')
-    .select('id, full_name, phone_number, phone, active_role, roles, verification_status, proof_of_id_urls, drivers_license_urls, proof_of_address_urls, created_at, updated_at, verification_notes, address')
+    .select('id, full_name, phone_number, phone, active_role, roles, verification_status, proof_of_id_urls, drivers_license_urls, proof_of_address_urls, created_at, updated_at, address')
     .eq('id', id)
     .single();
 
@@ -240,20 +240,6 @@ export default async function VerificationDetailPage({
               </div>
             )}
           </div>
-
-          {/* Admin Notes (if rejected) */}
-          {verification.verification_status === 'rejected' && verification.verification_notes && (
-            <div className="p-8 border-b border-gray-200 bg-red-50">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Rejection Reason
-              </h2>
-              <div className="bg-white rounded-lg p-4 border border-red-200">
-                <p className="text-gray-900">
-                  {verification.verification_notes}
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Review Form (only if pending) */}
           {verification.verification_status === 'pending' && (

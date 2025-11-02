@@ -46,7 +46,7 @@ export default async function AdminVerificationsPage({
 
   let dataQuery = supabase
     .from('profiles')
-    .select('id, full_name, phone_number, phone, active_role, roles, verification_status, proof_of_id_urls, drivers_license_urls, proof_of_address_urls, created_at, updated_at, verification_notes')
+    .select('id, full_name, phone_number, phone, active_role, roles, verification_status, proof_of_id_urls, drivers_license_urls, proof_of_address_urls, created_at, updated_at')
     .or('proof_of_id_urls.not.is.null,drivers_license_urls.not.is.null,proof_of_address_urls.not.is.null');
 
   // Apply status filter if provided

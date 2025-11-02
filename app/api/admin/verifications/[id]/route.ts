@@ -60,7 +60,6 @@ export async function PATCH(
     // Build update object
     const updateData: any = {
       verification_status: status,
-      verification_notes: admin_notes || null,
       updated_at: new Date().toISOString(),
     };
 

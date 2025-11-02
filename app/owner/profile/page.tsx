@@ -327,11 +327,8 @@ export default function OwnerProfilePage() {
           {verificationStatus === 'pending' && (
             <p className="text-sm">Our team is reviewing your documents. This usually takes 1-2 business days.</p>
           )}
-          {verificationStatus === 'rejected' && profile?.verification_notes && (
-            <div className="mt-3 p-3 bg-white rounded-lg">
-              <p className="text-sm font-semibold mb-1">Reason:</p>
-              <p className="text-sm">{profile.verification_notes}</p>
-            </div>
+          {verificationStatus === 'rejected' && (
+            <p className="text-sm">Please contact support for more information.</p>
           )}
         </div>
 
