@@ -58,10 +58,26 @@ export default async function VerificationDetailPage({
     );
   }
 
-  // Document URLs are already stored as full URLs in the arrays
-  const proofOfIdUrls = verification.proof_of_id_urls || [];
-  const proofOfAddressUrls = verification.proof_of_address_urls || [];
-  const driversLicenseUrls = verification.drivers_license_urls || [];
+  // Helper function to construct full storage URL from path
+  const getStorageUrl = (path: string | null) => {
+    if (!path) return null;
+
+    // If it's already a full URL, return as is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    // Otherwise, construct the full URL
+    // Use verification-documents bucket for verification files
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const storageBucket = 'verification-documents';
+    return `${supabaseUrl}/storage/v1/object/public/${storageBucket}/${path}`;
+  };
+
+  // Document URLs might be stored as paths or full URLs - convert all to full URLs
+  const proofOfIdUrls = (verification.proof_of_id_urls || []).map(getStorageUrl).filter(Boolean) as string[];
+  const proofOfAddressUrls = (verification.proof_of_address_urls || []).map(getStorageUrl).filter(Boolean) as string[];
+  const driversLicenseUrls = (verification.drivers_license_urls || []).map(getStorageUrl).filter(Boolean) as string[];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,7 +171,7 @@ export default async function VerificationDetailPage({
                 <p className="text-lg text-gray-900">
                   {format(
                     new Date(verification.created_at),
-                    'MMM dd, yyyy'
+                    'MMM dd, yyyy HH:mm'
                   )}
                 </p>
               </div>
