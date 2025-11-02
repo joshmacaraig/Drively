@@ -33,6 +33,8 @@ import { useToast } from '@/components/ui/ToastContainer';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { ownerQuotes } from '@/lib/loadingQuotes';
+import { CarPricingRule } from '@/lib/types/database';
+import { calculateRentalPrice, formatDiscountDescription } from '@/lib/utils/pricing';
 
 export default function RentalDetailsPage() {
   const router = useRouter();
@@ -46,6 +48,7 @@ export default function RentalDetailsPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentImageSet, setCurrentImageSet] = useState<string[]>([]);
+  const [pricingRules, setPricingRules] = useState<CarPricingRule[]>([]);
 
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false);
@@ -115,6 +118,20 @@ export default function RentalDetailsPage() {
           .eq('status', 'completed');
 
         setRenterTripCount(count || 0);
+      }
+
+      // Load pricing rules for the car
+      if (data.car_id) {
+        const { data: rulesData } = await supabase
+          .from('car_pricing_rules')
+          .select('*')
+          .eq('car_id', data.car_id)
+          .eq('is_active', true)
+          .order('min_days', { ascending: true });
+
+        if (rulesData) {
+          setPricingRules(rulesData);
+        }
       }
 
       // Initialize form fields
@@ -972,12 +989,55 @@ export default function RentalDetailsPage() {
                 </h2>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-secondary-600">Total Amount</span>
-                    <span className="text-2xl font-bold text-primary-600">
-                      ₱{parseFloat(rental.total_amount).toLocaleString()}
-                    </span>
-                  </div>
+                  {(() => {
+                    const startDate = new Date(rental.start_datetime);
+                    const endDate = new Date(rental.end_datetime);
+                    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                    const dailyRate = parseFloat(rental.car?.daily_rate || 0);
+                    const priceCalc = calculateRentalPrice(dailyRate, totalDays, pricingRules);
+
+                    return (
+                      <>
+                        {priceCalc.appliedRule && (
+                          <>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-secondary-600">Base Rate</span>
+                              <span className="text-secondary-900 font-semibold">
+                                ₱{dailyRate.toLocaleString()} × {totalDays} days
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-secondary-600">Subtotal</span>
+                              <span className="text-secondary-900 font-semibold">
+                                ₱{priceCalc.basePrice.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm pb-3 border-b border-secondary-200">
+                              <span className="text-green-600 font-semibold">
+                                Discount ({formatDiscountDescription(priceCalc.appliedRule)})
+                              </span>
+                              <span className="text-green-600 font-bold">
+                                -₱{priceCalc.discount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-secondary-600">Total Amount</span>
+                          <span className="text-2xl font-bold text-primary-600">
+                            ₱{parseFloat(rental.total_amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        {priceCalc.appliedRule && (
+                          <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                            <p className="text-xs text-green-800 font-semibold">
+                              🎉 {priceCalc.discountPercentage.toFixed(0)}% discount applied!
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   <div className="pt-3 border-t border-secondary-200">
                     <div className="flex items-center justify-between mb-2">

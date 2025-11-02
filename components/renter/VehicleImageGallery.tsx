@@ -68,6 +68,7 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
               src={images[0].image_url}
               alt={carName}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               priority
             />
@@ -95,6 +96,7 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
                       src={image.image_url}
                       alt={`${carName} ${actualIndex + 1}`}
                       fill
+                      sizes="(max-width: 768px) 25vw, 150px"
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
@@ -162,6 +164,7 @@ export default function VehicleImageGallery({ images, carName }: VehicleImageGal
                 src={selectedImage}
                 alt={`${carName} full size`}
                 fill
+                sizes="100vw"
                 className="object-contain"
               />
             </div>
