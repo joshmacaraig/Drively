@@ -10,9 +10,9 @@ const ITEMS_PER_PAGE = 20;
 export default async function AdminVerificationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; status?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, status: statusFilter } = await searchParams;
   const currentPage = Math.max(1, parseInt(pageParam || '1'));
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -37,20 +37,30 @@ export default async function AdminVerificationsPage({
     redirect('/');
   }
 
-  // Get total count
-  const { count: totalCount } = await supabase
-    .from('verification_documents')
-    .select('*', { count: 'exact', head: true });
+  // Query profiles table for users who have uploaded verification documents
+  // Filter by verification_status and check if they have any uploaded docs
+  let countQuery = supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .or('proof_of_id_urls.not.is.null,drivers_license_urls.not.is.null,proof_of_address_urls.not.is.null');
 
-  // Fetch verification documents with pagination
-  const { data: verifications, error } = await supabase
-    .from('verification_documents')
-    .select(`
-      *,
-      user:profiles!verification_documents_user_id_fkey(full_name, phone_number),
-      reviewer:profiles!verification_documents_reviewed_by_fkey(full_name)
-    `)
-    .order('submitted_at', { ascending: false })
+  let dataQuery = supabase
+    .from('profiles')
+    .select('id, full_name, phone_number, phone, active_role, roles, verification_status, proof_of_id_urls, drivers_license_urls, proof_of_address_urls, created_at, updated_at, verification_notes')
+    .or('proof_of_id_urls.not.is.null,drivers_license_urls.not.is.null,proof_of_address_urls.not.is.null');
+
+  // Apply status filter if provided
+  if (statusFilter && ['pending', 'verified', 'rejected'].includes(statusFilter)) {
+    countQuery = countQuery.eq('verification_status', statusFilter);
+    dataQuery = dataQuery.eq('verification_status', statusFilter);
+  }
+
+  // Get total count
+  const { count: totalCount } = await countQuery;
+
+  // Fetch profiles with verification documents and pagination
+  const { data: verifications, error } = await dataQuery
+    .order('updated_at', { ascending: false })
     .range(offset, offset + ITEMS_PER_PAGE - 1);
 
   const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
@@ -89,18 +99,46 @@ export default async function AdminVerificationsPage({
 
             {/* Filter tabs */}
             <div className="flex gap-4 mb-6 border-b border-gray-200">
-              <button className="px-4 py-2 font-semibold text-gray-900 border-b-2 border-gray-900">
+              <Link
+                href="/admin/verifications"
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  !statusFilter
+                    ? 'text-gray-900 border-b-2 border-gray-900'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
                 All
-              </button>
-              <button className="px-4 py-2 font-semibold text-gray-600 hover:text-gray-900">
+              </Link>
+              <Link
+                href="/admin/verifications?status=pending"
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  statusFilter === 'pending'
+                    ? 'text-gray-900 border-b-2 border-gray-900'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
                 Pending
-              </button>
-              <button className="px-4 py-2 font-semibold text-gray-600 hover:text-gray-900">
-                Approved
-              </button>
-              <button className="px-4 py-2 font-semibold text-gray-600 hover:text-gray-900">
+              </Link>
+              <Link
+                href="/admin/verifications?status=verified"
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  statusFilter === 'verified'
+                    ? 'text-gray-900 border-b-2 border-gray-900'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Verified
+              </Link>
+              <Link
+                href="/admin/verifications?status=rejected"
+                className={`px-4 py-2 font-semibold transition-colors ${
+                  statusFilter === 'rejected'
+                    ? 'text-gray-900 border-b-2 border-gray-900'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
                 Rejected
-              </button>
+              </Link>
             </div>
 
             <div className="overflow-x-auto">
@@ -114,13 +152,13 @@ export default async function AdminVerificationsPage({
                       Documents
                     </th>
                     <th className="text-left py-4 px-4 font-semibold text-gray-900">
-                      Submitted
+                      Last Updated
                     </th>
                     <th className="text-left py-4 px-4 font-semibold text-gray-900">
                       Status
                     </th>
                     <th className="text-left py-4 px-4 font-semibold text-gray-900">
-                      Reviewed By
+                      Role
                     </th>
                     <th className="text-left py-4 px-4 font-semibold text-gray-900">
                       Actions
@@ -137,53 +175,55 @@ export default async function AdminVerificationsPage({
                         <td className="py-4 px-4">
                           <div>
                             <p className="font-medium text-gray-900">
-                              {verification.user?.full_name || 'Unknown'}
+                              {verification.full_name || 'Unknown'}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {verification.user?.phone_number || 'N/A'}
+                              {verification.phone_number || verification.phone || 'N/A'}
                             </p>
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex flex-col gap-1">
-                            {verification.philsys_id_url && (
+                          <div className="flex flex-wrap gap-1">
+                            {verification.proof_of_id_urls && verification.proof_of_id_urls.length > 0 && (
                               <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                                Proof of ID
+                                ID ({verification.proof_of_id_urls.length})
                               </span>
                             )}
-                            {verification.drivers_license_url && (
+                            {verification.drivers_license_urls && verification.drivers_license_urls.length > 0 && (
                               <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
-                                Driver's License
+                                License ({verification.drivers_license_urls.length})
                               </span>
                             )}
-                            {verification.proof_of_address_url && (
+                            {verification.proof_of_address_urls && verification.proof_of_address_urls.length > 0 && (
                               <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
-                                Proof of Address
+                                Address ({verification.proof_of_address_urls.length})
                               </span>
                             )}
                           </div>
                         </td>
                         <td className="py-4 px-4 text-gray-600">
                           {format(
-                            new Date(verification.submitted_at),
+                            new Date(verification.updated_at),
                             'MMM dd, yyyy HH:mm'
                           )}
                         </td>
                         <td className="py-4 px-4">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              verification.status === 'approved'
+                            className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                              verification.verification_status === 'verified'
                                 ? 'bg-green-100 text-green-800'
-                                : verification.status === 'rejected'
+                                : verification.verification_status === 'rejected'
                                   ? 'bg-red-100 text-red-800'
                                   : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
-                            {verification.status}
+                            {verification.verification_status || 'pending'}
                           </span>
                         </td>
                         <td className="py-4 px-4 text-gray-600">
-                          {verification.reviewer?.full_name || '-'}
+                          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded capitalize">
+                            {verification.active_role || '-'}
+                          </span>
                         </td>
                         <td className="py-4 px-4">
                           <Link

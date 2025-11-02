@@ -33,14 +33,10 @@ export default async function VerificationDetailPage({
     redirect('/');
   }
 
-  // Fetch verification details
+  // Fetch profile details (new verification system)
   const { data: verification, error } = await supabase
-    .from('verification_documents')
-    .select(`
-      *,
-      user:profiles!user_id(id, full_name, phone_number, active_role, roles, created_at),
-      reviewer:profiles!reviewed_by(full_name)
-    `)
+    .from('profiles')
+    .select('id, full_name, phone_number, phone, active_role, roles, verification_status, proof_of_id_urls, drivers_license_urls, proof_of_address_urls, created_at, updated_at, verification_notes, address')
     .eq('id', id)
     .single();
 
@@ -62,26 +58,10 @@ export default async function VerificationDetailPage({
     );
   }
 
-  // Helper function to construct full storage URL from path
-  const getStorageUrl = (path: string | null) => {
-    if (!path) return null;
-
-    // If it's already a full URL, return as is
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-
-    // Otherwise, construct the full URL
-    // Use verification-documents bucket for verification files
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const storageBucket = 'verification-documents';
-    return `${supabaseUrl}/storage/v1/object/public/${storageBucket}/${path}`;
-  };
-
-  // Get full URLs for documents
-  const proofOfIdUrl = getStorageUrl(verification.philsys_id_url);
-  const proofOfAddressUrl = getStorageUrl(verification.proof_of_address_url);
-  const driversLicenseUrl = getStorageUrl(verification.drivers_license_url);
+  // Document URLs are already stored as full URLs in the arrays
+  const proofOfIdUrls = verification.proof_of_id_urls || [];
+  const proofOfAddressUrls = verification.proof_of_address_urls || [];
+  const driversLicenseUrls = verification.drivers_license_urls || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -114,15 +94,15 @@ export default async function VerificationDetailPage({
                 </p>
               </div>
               <span
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  verification.status === 'approved'
+                className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
+                  verification.verification_status === 'verified'
                     ? 'bg-green-50 text-green-700 border border-green-200'
-                    : verification.status === 'rejected'
+                    : verification.verification_status === 'rejected'
                       ? 'bg-red-50 text-red-700 border border-red-200'
                       : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                 }`}
               >
-                {verification.status.toUpperCase()}
+                {verification.verification_status || 'pending'}
               </span>
             </div>
           </div>
@@ -136,25 +116,31 @@ export default async function VerificationDetailPage({
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Full Name</p>
                 <p className="text-lg text-gray-900">
-                  {verification.user?.full_name}
+                  {verification.full_name}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Phone Number</p>
                 <p className="text-lg text-gray-900">
-                  {verification.user?.phone_number || 'Not provided'}
+                  {verification.phone_number || verification.phone || 'Not provided'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Address</p>
+                <p className="text-lg text-gray-900">
+                  {verification.address || 'Not provided'}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">Current Role</p>
                 <p className="text-lg text-gray-900 capitalize">
-                  {verification.user?.active_role}
+                  {verification.active_role}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">All Roles</p>
                 <div className="flex gap-2 mt-1">
-                  {verification.user?.roles?.map((role: string) => (
+                  {verification.roles?.map((role: string) => (
                     <span
                       key={role}
                       className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium capitalize"
@@ -168,16 +154,16 @@ export default async function VerificationDetailPage({
                 <p className="text-sm font-medium text-gray-500 mb-1">Member Since</p>
                 <p className="text-lg text-gray-900">
                   {format(
-                    new Date(verification.user?.created_at),
+                    new Date(verification.created_at),
                     'MMM dd, yyyy'
                   )}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Submitted</p>
+                <p className="text-sm font-medium text-gray-500 mb-1">Last Updated</p>
                 <p className="text-lg text-gray-900">
                   {format(
-                    new Date(verification.submitted_at),
+                    new Date(verification.updated_at),
                     'MMM dd, yyyy HH:mm'
                   )}
                 </p>
@@ -190,81 +176,91 @@ export default async function VerificationDetailPage({
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
               Submitted Documents
             </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {proofOfIdUrl && (
-                <VerificationImageViewer
-                  imageUrl={proofOfIdUrl}
-                  title="Proof of ID"
-                  colorClass="bg-blue-50 text-blue-700"
-                />
-              )}
 
-              {driversLicenseUrl && (
-                <VerificationImageViewer
-                  imageUrl={driversLicenseUrl}
-                  title="Driver's License"
-                  colorClass="bg-green-50 text-green-700"
-                />
-              )}
+            {/* Proof of ID Documents */}
+            {proofOfIdUrls.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Proof of ID ({proofOfIdUrls.length})
+                </h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {proofOfIdUrls.map((url: string, index: number) => (
+                    <VerificationImageViewer
+                      key={url}
+                      imageUrl={url}
+                      title={`ID ${index + 1}`}
+                      colorClass="bg-blue-50 text-blue-700"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {proofOfAddressUrl && (
-                <VerificationImageViewer
-                  imageUrl={proofOfAddressUrl}
-                  title="Proof of Address"
-                  colorClass="bg-purple-50 text-purple-700"
-                />
-              )}
-            </div>
+            {/* Driver's License Documents */}
+            {driversLicenseUrls.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Driver's License ({driversLicenseUrls.length})
+                </h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {driversLicenseUrls.map((url: string, index: number) => (
+                    <VerificationImageViewer
+                      key={url}
+                      imageUrl={url}
+                      title={`License ${index + 1}`}
+                      colorClass="bg-green-50 text-green-700"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {!proofOfIdUrl && !driversLicenseUrl && !proofOfAddressUrl && (
+            {/* Proof of Address Documents */}
+            {proofOfAddressUrls.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Proof of Address ({proofOfAddressUrls.length})
+                </h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {proofOfAddressUrls.map((url: string, index: number) => (
+                    <VerificationImageViewer
+                      key={url}
+                      imageUrl={url}
+                      title={`Address ${index + 1}`}
+                      colorClass="bg-purple-50 text-purple-700"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {proofOfIdUrls.length === 0 && driversLicenseUrls.length === 0 && proofOfAddressUrls.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 No documents submitted
               </div>
             )}
           </div>
 
-          {/* Review History */}
-          {verification.reviewed_at && (
-            <div className="p-8 border-b border-gray-200 bg-gray-50">
+          {/* Admin Notes (if rejected) */}
+          {verification.verification_status === 'rejected' && verification.verification_notes && (
+            <div className="p-8 border-b border-gray-200 bg-red-50">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Review History
+                Rejection Reason
               </h2>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Reviewed By</p>
-                  <p className="text-lg text-gray-900">
-                    {verification.reviewer?.full_name || 'Unknown'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Reviewed At</p>
-                  <p className="text-lg text-gray-900">
-                    {format(
-                      new Date(verification.reviewed_at),
-                      'MMM dd, yyyy HH:mm'
-                    )}
-                  </p>
-                </div>
+              <div className="bg-white rounded-lg p-4 border border-red-200">
+                <p className="text-gray-900">
+                  {verification.verification_notes}
+                </p>
               </div>
-              {verification.admin_notes && (
-                <div className="mt-6">
-                  <p className="text-sm font-medium text-gray-500 mb-2">Admin Notes</p>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-gray-900">
-                      {verification.admin_notes}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
           {/* Review Form (only if pending) */}
-          {verification.status === 'pending' && (
+          {verification.verification_status === 'pending' && (
             <div className="p-8">
               <VerificationReviewForm
                 verificationId={verification.id}
-                userId={verification.user_id}
+                userId={verification.id}
               />
             </div>
           )}

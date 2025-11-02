@@ -36,36 +36,51 @@ export async function PATCH(
     const { status, admin_notes, approve_as_role } = body;
 
     // Validate status
-    if (!['approved', 'rejected'].includes(status)) {
+    if (!['verified', 'rejected'].includes(status)) {
       return NextResponse.json(
-        { error: 'Invalid status. Must be "approved" or "rejected"' },
+        { error: 'Invalid status. Must be "verified" or "rejected"' },
         { status: 400 }
       );
     }
 
-    // Get the verification document
-    const { data: verification, error: verificationError } = await supabase
-      .from('verification_documents')
-      .select('*, user:profiles!user_id(id, full_name, roles, active_role)')
+    // Get the user profile (new verification system uses profiles table directly)
+    const { data: userProfile, error: profileFetchError } = await supabase
+      .from('profiles')
+      .select('id, full_name, roles, active_role, verification_status')
       .eq('id', id)
       .single();
 
-    if (verificationError || !verification) {
+    if (profileFetchError || !userProfile) {
       return NextResponse.json(
-        { error: 'Verification not found' },
+        { error: 'User profile not found' },
         { status: 404 }
       );
     }
 
-    // Update the verification document
-    const { data: updatedVerification, error: updateError } = await supabase
-      .from('verification_documents')
-      .update({
-        status,
-        admin_notes,
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-      })
+    // Build update object
+    const updateData: any = {
+      verification_status: status,
+      verification_notes: admin_notes || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // If approved, update the user's roles
+    if (status === 'verified' && approve_as_role) {
+      const userRoles = userProfile.roles || ['renter'];
+
+      // Add the new role if not already present
+      const newRoles = userRoles.includes(approve_as_role)
+        ? userRoles
+        : [...userRoles, approve_as_role];
+
+      updateData.roles = newRoles;
+      updateData.active_role = approve_as_role;
+    }
+
+    // Update the profile
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from('profiles')
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -77,46 +92,10 @@ export async function PATCH(
       );
     }
 
-    // If approved, update the user's roles and verification status
-    if (status === 'approved' && approve_as_role) {
-      const userRoles = verification.user.roles || ['renter'];
-
-      // Add the new role if not already present
-      const newRoles = userRoles.includes(approve_as_role)
-        ? userRoles
-        : [...userRoles, approve_as_role];
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          roles: newRoles,
-          active_role: approve_as_role,
-          verification_status: 'verified', // Update verification status for legacy compatibility
-        })
-        .eq('id', verification.user_id);
-
-      if (profileError) {
-        console.error('Failed to update user roles:', profileError);
-        // Don't fail the whole operation, just log it
-      }
-    } else if (status === 'rejected') {
-      // If rejected, update verification status to rejected
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          verification_status: 'rejected',
-        })
-        .eq('id', verification.user_id);
-
-      if (profileError) {
-        console.error('Failed to update verification status:', profileError);
-      }
-    }
-
     return NextResponse.json({
       success: true,
       message: `Verification ${status} successfully`,
-      data: updatedVerification,
+      data: updatedProfile,
     });
   } catch (error: any) {
     console.error('Error processing verification:', error);

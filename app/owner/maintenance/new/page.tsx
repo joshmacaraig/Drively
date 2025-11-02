@@ -16,12 +16,14 @@ import {
 } from '@phosphor-icons/react';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import { savingQuotes } from '@/lib/loadingQuotes';
+import OwnerNavigation from '@/components/owner/OwnerNavigation';
 
 export default function NewMaintenancePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cars, setCars] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   // Form state
   const [carId, setCarId] = useState('');
@@ -37,7 +39,27 @@ export default function NewMaintenancePage() {
 
   useEffect(() => {
     loadCars();
+    loadUserProfile();
   }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        setUserProfile(profileData);
+      }
+    } catch (err: any) {
+      console.error('Error loading user profile:', err);
+    }
+  };
 
   const loadCars = async () => {
     try {
@@ -107,7 +129,13 @@ export default function NewMaintenancePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
-      <div className="container mx-auto px-4 py-8">
+      {/* Navigation */}
+      <OwnerNavigation
+        userFullName={userProfile?.full_name}
+        userAvatar={userProfile?.avatar_url}
+      />
+
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="mb-8">

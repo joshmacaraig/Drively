@@ -18,9 +18,11 @@ export default function VerificationReviewForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleReview = async (status: 'approved' | 'rejected') => {
+  const handleReview = async (action: 'verify' | 'reject') => {
     setIsSubmitting(true);
     setError(null);
+
+    const status = action === 'verify' ? 'verified' : 'rejected';
 
     try {
       const response = await fetch(`/api/admin/verifications/${verificationId}`, {
@@ -31,7 +33,7 @@ export default function VerificationReviewForm({
         body: JSON.stringify({
           status,
           admin_notes: adminNotes,
-          approve_as_role: status === 'approved' ? approveAsRole : null,
+          approve_as_role: action === 'verify' ? approveAsRole : null,
         }),
       });
 
@@ -126,7 +128,7 @@ export default function VerificationReviewForm({
       {/* Action Buttons */}
       <div className="flex gap-3">
         <button
-          onClick={() => handleReview('approved')}
+          onClick={() => handleReview('verify')}
           disabled={isSubmitting}
           className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-xl transition-all shadow-sm hover:shadow-md"
         >
@@ -155,12 +157,12 @@ export default function VerificationReviewForm({
               Processing...
             </span>
           ) : (
-            `Approve as ${approveAsRole === 'renter' ? 'Renter' : 'Car Owner'}`
+            `Verify as ${approveAsRole === 'renter' ? 'Renter' : 'Car Owner'}`
           )}
         </button>
 
         <button
-          onClick={() => handleReview('rejected')}
+          onClick={() => handleReview('reject')}
           disabled={isSubmitting}
           className="px-8 bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-900 font-medium py-4 rounded-xl transition-all border-2 border-gray-300 hover:border-gray-400"
         >
