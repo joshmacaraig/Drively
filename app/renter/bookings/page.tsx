@@ -226,14 +226,12 @@ export default async function RenterBookingsPage({
                 </div>
 
                 {/* Action Button */}
-                {booking.status === 'active' && (
-                  <Link
-                    href={`/renter/bookings/${booking.id}`}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
-                  >
-                    View Details
-                  </Link>
-                )}
+                <Link
+                  href={`/renter/bookings/${booking.id}`}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                >
+                  View Details
+                </Link>
               </div>
             )}
           </div>
