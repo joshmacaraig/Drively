@@ -24,7 +24,7 @@ export default async function OwnerDashboard() {
   // Fetch user's cars count
   const { data: cars } = await supabase
     .from('cars')
-    .select('id, status')
+    .select('id, is_active')
     .eq('owner_id', user.id);
 
   // Fetch active rentals count
