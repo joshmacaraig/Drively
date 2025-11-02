@@ -26,7 +26,8 @@
       "Bash(npm run build:*)",
       "Bash(npx tsx:*)",
       "Bash(curl:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

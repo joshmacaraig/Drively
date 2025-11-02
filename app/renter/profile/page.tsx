@@ -51,7 +51,7 @@ export default function RenterProfilePage() {
         setProfile(profileData);
         setFormData({
           full_name: profileData.full_name || '',
-          phone: profileData.phone || '',
+          phone: profileData.phone || profileData.phone_number || '',
           address: profileData.address || '',
         });
 
@@ -245,7 +245,10 @@ export default function RenterProfilePage() {
 
       const { error } = await supabase
         .from('profiles')
-        .update(formData)
+        .update({
+          ...formData,
+          phone_number: formData.phone, // Update both phone fields for compatibility
+        })
         .eq('id', user.id);
 
       if (error) throw error;

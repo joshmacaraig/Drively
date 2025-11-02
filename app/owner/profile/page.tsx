@@ -52,7 +52,7 @@ export default function OwnerProfilePage() {
         setProfile(profileData);
         setFormData({
           full_name: profileData.full_name || '',
-          phone: profileData.phone || '',
+          phone: profileData.phone || profileData.phone_number || '',
         });
 
         // Fetch signed URLs for documents
@@ -110,6 +110,7 @@ export default function OwnerProfilePage() {
         .update({
           full_name: formData.full_name,
           phone: formData.phone,
+          phone_number: formData.phone, // Update both fields for compatibility
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
