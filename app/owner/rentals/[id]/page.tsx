@@ -24,6 +24,10 @@ import {
   CaretRight,
   PencilSimple,
   Check,
+  ShieldCheck,
+  IdentificationCard,
+  CalendarBlank,
+  Star,
 } from '@phosphor-icons/react';
 import { useToast } from '@/components/ui/ToastContainer';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
@@ -56,6 +60,7 @@ export default function RentalDetailsPage() {
   const [beforePhotos, setBeforePhotos] = useState<File[]>([]);
   const [afterPhotos, setAfterPhotos] = useState<File[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [renterTripCount, setRenterTripCount] = useState<number>(0);
 
   useEffect(() => {
     if (rentalId) {
@@ -87,7 +92,7 @@ export default function RentalDetailsPage() {
         .select(`
           *,
           car:cars!rentals_car_id_fkey(id, make, model, year, plate_number, daily_rate, primary_image_url),
-          renter:profiles!rentals_renter_id_fkey(id, full_name, phone_number, email)
+          renter:profiles!rentals_renter_id_fkey(id, full_name, phone_number, email, verification_status, created_at, proof_of_id_urls, drivers_license_urls)
         `)
         .eq('id', rentalId)
         .eq('owner_id', user.id)
@@ -100,6 +105,17 @@ export default function RentalDetailsPage() {
       }
 
       setRental(data);
+
+      // Count renter's previous completed trips (only if not a guest booking)
+      if (!data.is_manual_booking && data.renter_id) {
+        const { count } = await supabase
+          .from('rentals')
+          .select('*', { count: 'exact', head: true })
+          .eq('renter_id', data.renter_id)
+          .eq('status', 'completed');
+
+        setRenterTripCount(count || 0);
+      }
 
       // Initialize form fields
       setStartMileage(data.start_mileage?.toString() || '');
@@ -454,6 +470,74 @@ export default function RentalDetailsPage() {
                   )}
                 </h2>
 
+                {/* Verification Status - Only for registered renters */}
+                {!rental.is_manual_booking && rental.renter && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ShieldCheck size={24} weight="duotone" className="text-green-600" />
+                      <h3 className="font-bold text-secondary-900">Verification Status</h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* ID Verification Badge */}
+                      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                        rental.renter.proof_of_id_urls && rental.renter.proof_of_id_urls.length > 0 && rental.renter.verification_status === 'verified'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        <IdentificationCard size={18} weight="duotone" />
+                        <div className="text-xs">
+                          <p className="font-semibold">ID {rental.renter.proof_of_id_urls && rental.renter.proof_of_id_urls.length > 0 && rental.renter.verification_status === 'verified' ? 'Verified' : 'Not Verified'}</p>
+                        </div>
+                      </div>
+
+                      {/* License Verification Badge */}
+                      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                        rental.renter.drivers_license_urls && rental.renter.drivers_license_urls.length > 0 && rental.renter.verification_status === 'verified'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        <Car size={18} weight="duotone" />
+                        <div className="text-xs">
+                          <p className="font-semibold">License {rental.renter.drivers_license_urls && rental.renter.drivers_license_urls.length > 0 && rental.renter.verification_status === 'verified' ? 'Verified' : 'Not Verified'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Account Standing & Stats */}
+                    <div className="mt-3 pt-3 border-t border-green-200 grid grid-cols-2 gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <CalendarBlank size={16} weight="duotone" className="text-secondary-500" />
+                        <div>
+                          <p className="text-secondary-600">Member Since</p>
+                          <p className="font-semibold text-secondary-900">
+                            {new Date(rental.renter.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Car size={16} weight="duotone" className="text-secondary-500" />
+                        <div>
+                          <p className="text-secondary-600">Completed Trips</p>
+                          <p className="font-semibold text-secondary-900">{renterTripCount}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rating Placeholder */}
+                    <div className="mt-3 pt-3 border-t border-green-200">
+                      <div className="flex items-center gap-2">
+                        <Star size={16} weight="fill" className="text-yellow-500" />
+                        <p className="text-xs text-secondary-600">
+                          Rating: <span className="font-semibold text-secondary-900">New Renter</span>
+                          <span className="ml-1 text-secondary-500">(Rating system coming soon)</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Information */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <User size={20} weight="duotone" className="text-secondary-400" />
