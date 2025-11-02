@@ -24,7 +24,13 @@ export default function ForgotPasswordPage() {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle rate limit error gracefully
+        if (error.message.includes('rate limit') || error.message.includes('Email rate limit exceeded')) {
+          throw new Error('Too many password reset attempts. Please try again in a few minutes.');
+        }
+        throw error;
+      }
 
       setSuccess(true);
     } catch (err: any) {

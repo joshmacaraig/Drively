@@ -6,14 +6,16 @@ import { useRouter } from 'next/navigation';
 interface VerificationReviewFormProps {
   verificationId: string;
   userId: string;
+  defaultRole?: 'renter' | 'car_owner';
 }
 
 export default function VerificationReviewForm({
   verificationId,
   userId,
+  defaultRole = 'renter',
 }: VerificationReviewFormProps) {
   const router = useRouter();
-  const [approveAsRole, setApproveAsRole] = useState<'renter' | 'car_owner'>('renter');
+  const [approveAsRole, setApproveAsRole] = useState<'renter' | 'car_owner'>(defaultRole);
   const [adminNotes, setAdminNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

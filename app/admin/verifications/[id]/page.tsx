@@ -263,6 +263,7 @@ export default async function VerificationDetailPage({
               <VerificationReviewForm
                 verificationId={verification.id}
                 userId={verification.id}
+                defaultRole={verification.active_role as 'renter' | 'car_owner'}
               />
             </div>
           )}

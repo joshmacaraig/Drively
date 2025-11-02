@@ -76,7 +76,13 @@ function SignupForm() {
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Handle rate limit error gracefully
+        if (signUpError.message.includes('rate limit') || signUpError.message.includes('Email rate limit exceeded')) {
+          throw new Error('Too many signup attempts. Please try again in a few minutes or contact support.');
+        }
+        throw signUpError;
+      }
 
       if (data.user) {
         // Show success message asking user to verify email
