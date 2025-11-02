@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Trash, Warning } from '@phosphor-icons/react';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { deletingQuotes } from '@/lib/loadingQuotes';
 
 interface DeleteCarButtonProps {
   carId: string;
@@ -58,6 +60,10 @@ export default function DeleteCarButton({ carId, carName }: DeleteCarButtonProps
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingOverlay quotes={deletingQuotes} />;
+  }
 
   if (showConfirm) {
     return (

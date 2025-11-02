@@ -4,8 +4,17 @@ import Link from 'next/link';
 import { Car, Plus, MapPin, CurrencyCircleDollar, GearSix, Users } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function OwnerCarsPage() {
+const ITEMS_PER_PAGE = 12;
+
+export default async function OwnerCarsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+}) {
   const supabase = await createClient();
 
   const {
@@ -16,7 +25,20 @@ export default async function OwnerCarsPage() {
     redirect('/auth/login');
   }
 
-  // Fetch user's cars with images
+  // Pagination
+  const params = await searchParams;
+  const currentPage = parseInt(params.page || '1');
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('cars')
+    .select('*', { count: 'exact', head: true })
+    .eq('owner_id', user.id);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  // Fetch user's cars with images and pagination
   const { data: cars, error } = await supabase
     .from('cars')
     .select(`
@@ -29,7 +51,8 @@ export default async function OwnerCarsPage() {
       )
     `)
     .eq('owner_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -220,6 +243,14 @@ export default async function OwnerCarsPage() {
                 );
               })}
             </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           )}
 
           {/* Back to Dashboard */}

@@ -14,6 +14,8 @@ import {
   GasPump,
   Plus,
 } from '@phosphor-icons/react';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { savingQuotes } from '@/lib/loadingQuotes';
 
 export default function NewMaintenancePage() {
   const router = useRouter();
@@ -98,6 +100,10 @@ export default function NewMaintenancePage() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingOverlay quotes={savingQuotes} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">

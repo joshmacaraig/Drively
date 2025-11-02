@@ -23,6 +23,8 @@ import {
   Fire,
   Trophy,
 } from '@phosphor-icons/react';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { creatingQuotes } from '@/lib/loadingQuotes';
 
 export default function NewBookingPage() {
   const router = useRouter();
@@ -347,6 +349,10 @@ export default function NewBookingPage() {
     setStartDateTime(start);
     setEndDateTime(end);
   };
+
+  if (loading) {
+    return <LoadingOverlay quotes={creatingQuotes} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">

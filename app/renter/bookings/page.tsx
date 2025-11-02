@@ -3,8 +3,17 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import RenterNavigation from '@/components/renter/RenterNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function RenterBookingsPage() {
+const ITEMS_PER_PAGE = 10;
+
+export default async function RenterBookingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+}) {
   const supabase = await createClient();
 
   const {
@@ -21,7 +30,20 @@ export default async function RenterBookingsPage() {
     .eq('id', user.id)
     .single();
 
-  // Fetch all bookings for this renter
+  // Pagination
+  const params = await searchParams;
+  const currentPage = parseInt(params.page || '1');
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('rentals')
+    .select('*', { count: 'exact', head: true })
+    .eq('renter_id', user.id);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  // Fetch bookings for this renter with pagination
   const { data: bookings, error } = await supabase
     .from('rentals')
     .select(`
@@ -48,7 +70,8 @@ export default async function RenterBookingsPage() {
       )
     `)
     .eq('renter_id', user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
 
   if (error) {
     console.error('Error fetching bookings:', error);
@@ -234,7 +257,7 @@ export default async function RenterBookingsPage() {
         <div className="mb-8">
           <h1 className="text-4xl font-semibold text-gray-900 mb-2">My Bookings</h1>
           <p className="text-gray-600 text-lg">
-            {bookings?.length || 0} total booking{bookings?.length !== 1 ? 's' : ''}
+            {totalCount || 0} total booking{totalCount !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -282,6 +305,14 @@ export default async function RenterBookingsPage() {
                 </div>
               </div>
             )}
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           </div>
         ) : (
           <div className="bg-white rounded-2xl p-12 text-center">

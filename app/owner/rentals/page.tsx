@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import DatePicker from 'react-datepicker';
@@ -25,12 +25,19 @@ import {
 } from '@phosphor-icons/react';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
 import { ToastProvider, useToast } from '@/components/ui/ToastContainer';
+import Pagination from '@/components/admin/Pagination';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { ownerQuotes } from '@/lib/loadingQuotes';
+
+const ITEMS_PER_PAGE = 10;
 
 function OwnerRentalsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [rentals, setRentals] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [cars, setCars] = useState<any[]>([]);
   const [selectedCarId, setSelectedCarId] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -53,7 +60,7 @@ function OwnerRentalsPageContent() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [searchParams]);
 
   const loadData = async () => {
     try {
@@ -83,7 +90,19 @@ function OwnerRentalsPageContent() {
 
       setCars(carsData || []);
 
-      // Load rentals
+      // Pagination
+      const currentPage = parseInt(searchParams.get('page') || '1');
+      const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+      // Get total count
+      const { count } = await supabase
+        .from('rentals')
+        .select('*', { count: 'exact', head: true })
+        .eq('owner_id', user.id);
+
+      setTotalCount(count || 0);
+
+      // Load rentals with pagination
       const { data: rentalsData } = await supabase
         .from('rentals')
         .select(`
@@ -92,7 +111,8 @@ function OwnerRentalsPageContent() {
           renter:profiles!rentals_renter_id_fkey(id, full_name, phone_number)
         `)
         .eq('owner_id', user.id)
-        .order('start_datetime', { ascending: false });
+        .order('start_datetime', { ascending: false })
+        .range(offset, offset + ITEMS_PER_PAGE - 1);
 
       setRentals(rentalsData || []);
     } catch (err) {
@@ -318,11 +338,7 @@ function OwnerRentalsPageContent() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingOverlay quotes={ownerQuotes} />;
   }
 
   return (
@@ -767,6 +783,14 @@ function OwnerRentalsPageContent() {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={parseInt(searchParams.get('page') || '1')}
+              totalPages={Math.ceil(totalCount / ITEMS_PER_PAGE)}
+              totalItems={totalCount}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           )}
 
           {/* Back to Dashboard */}

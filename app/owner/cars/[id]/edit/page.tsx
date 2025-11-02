@@ -22,6 +22,8 @@ import {
   FloppyDisk
 } from '@phosphor-icons/react';
 import PricingRulesManager from '@/components/owner/PricingRulesManager';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { savingQuotes, ownerQuotes } from '@/lib/loadingQuotes';
 
 export default function EditCarPage() {
   const params = useParams();
@@ -274,14 +276,11 @@ export default function EditCarPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-secondary-600">Loading car data...</p>
-        </div>
-      </div>
-    );
+    return <LoadingOverlay quotes={ownerQuotes} />;
+  }
+
+  if (saving) {
+    return <LoadingOverlay quotes={savingQuotes} />;
   }
 
   if (success) {

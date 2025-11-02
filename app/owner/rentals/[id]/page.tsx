@@ -27,6 +27,8 @@ import {
 } from '@phosphor-icons/react';
 import { useToast } from '@/components/ui/ToastContainer';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { ownerQuotes } from '@/lib/loadingQuotes';
 
 export default function RentalDetailsPage() {
   const router = useRouter();
@@ -305,11 +307,7 @@ export default function RentalDetailsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
-    );
+    return <LoadingOverlay quotes={ownerQuotes} />;
   }
 
   if (error || !rental) {

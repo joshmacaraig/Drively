@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { CaretDown } from '@phosphor-icons/react';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { savingQuotes } from '@/lib/loadingQuotes';
 
 interface ChangeStatusButtonProps {
   carId: string;
@@ -46,6 +48,10 @@ export default function ChangeStatusButton({ carId, currentStatus }: ChangeStatu
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingOverlay quotes={savingQuotes} />;
+  }
 
   return (
     <div className="relative">

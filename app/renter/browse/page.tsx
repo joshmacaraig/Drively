@@ -4,6 +4,9 @@ import Link from 'next/link';
 import RenterNavigation from '@/components/renter/RenterNavigation';
 import VehicleCard from '@/components/renter/VehicleCard';
 import BrowseFilters from '@/components/renter/BrowseFilters';
+import Pagination from '@/components/admin/Pagination';
+
+const ITEMS_PER_PAGE = 12;
 
 export default async function BrowsePage({
   searchParams,
@@ -17,6 +20,7 @@ export default async function BrowsePage({
     min_price?: string;
     max_price?: string;
     seats?: string;
+    page?: string;
   }>;
 }) {
   const supabase = await createClient();
@@ -38,6 +42,10 @@ export default async function BrowsePage({
   // Await searchParams (Next.js 15 requirement)
   const params = await searchParams;
 
+  // Pagination
+  const currentPage = parseInt(params.page || '1');
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
   // Check if dates are provided for availability filtering
   const startDate = params.start_date;
   const endDate = params.end_date;
@@ -54,6 +62,12 @@ export default async function BrowsePage({
       availableCarIds = availableCars.map((item: { car_id: string }) => item.car_id);
     }
   }
+
+  // Build base query for counting
+  let countQuery = supabase
+    .from('cars')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_active', true);
 
   // Build query for active cars with all related data
   let query = supabase
@@ -86,8 +100,10 @@ export default async function BrowsePage({
     if (availableCarIds.length === 0) {
       // No cars available for these dates, return empty array
       query = query.eq('id', '00000000-0000-0000-0000-000000000000'); // Non-existent ID
+      countQuery = countQuery.eq('id', '00000000-0000-0000-0000-000000000000');
     } else {
       query = query.in('id', availableCarIds);
+      countQuery = countQuery.in('id', availableCarIds);
     }
   }
 
@@ -95,29 +111,40 @@ export default async function BrowsePage({
   if (params.search) {
     const search = params.search.toLowerCase();
     query = query.or(`make.ilike.%${search}%,model.ilike.%${search}%,location.ilike.%${search}%`);
+    countQuery = countQuery.or(`make.ilike.%${search}%,model.ilike.%${search}%,location.ilike.%${search}%`);
   }
 
   if (params.transmission) {
     query = query.eq('transmission', params.transmission);
+    countQuery = countQuery.eq('transmission', params.transmission);
   }
 
   if (params.fuel_type) {
     query = query.eq('fuel_type', params.fuel_type);
+    countQuery = countQuery.eq('fuel_type', params.fuel_type);
   }
 
   if (params.min_price) {
     query = query.gte('daily_rate', parseFloat(params.min_price));
+    countQuery = countQuery.gte('daily_rate', parseFloat(params.min_price));
   }
 
   if (params.max_price) {
     query = query.lte('daily_rate', parseFloat(params.max_price));
+    countQuery = countQuery.lte('daily_rate', parseFloat(params.max_price));
   }
 
   if (params.seats) {
     query = query.gte('seats', parseInt(params.seats));
+    countQuery = countQuery.gte('seats', parseInt(params.seats));
   }
 
-  const { data: cars, error } = await query;
+  // Get total count
+  const { count: totalCount } = await countQuery;
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  // Apply pagination
+  const { data: cars, error } = await query.range(offset, offset + ITEMS_PER_PAGE - 1);
 
   if (error) {
     console.error('Error fetching cars:', error);
@@ -170,7 +197,7 @@ export default async function BrowsePage({
             Browse Vehicles
           </h1>
           <p className="text-gray-600 text-lg">
-            {cars?.length || 0} vehicles available
+            {totalCount || 0} vehicles available
             {startDate && endDate && (
               <>
                 {' '}for{' '}
@@ -189,17 +216,27 @@ export default async function BrowsePage({
 
         {/* Results */}
         {cars && cars.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {cars.map((car) => (
-              <VehicleCard
-                key={car.id}
-                car={car}
-                isVerified={isVerified}
-                startDate={startDate}
-                endDate={endDate}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {cars.map((car) => (
+                <VehicleCard
+                  key={car.id}
+                  car={car}
+                  isVerified={isVerified}
+                  startDate={startDate}
+                  endDate={endDate}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
+          </>
         ) : (
           <div className="text-center py-16">
             <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

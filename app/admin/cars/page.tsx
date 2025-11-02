@@ -69,13 +69,12 @@ export default async function AdminCarsPage({
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-secondary-900">
-                  Manage Cars
-                </h1>
-                <p className="text-secondary-600 mt-1">
-                  View and manage all listed vehicles
-                </p>
-              </div>
+              <h1 className="text-3xl font-bold text-secondary-900">
+                Manage Cars
+              </h1>
+              <p className="text-secondary-600 mt-1">
+                View and manage all listed vehicles
+              </p>
             </div>
 
             <div className="overflow-x-auto">

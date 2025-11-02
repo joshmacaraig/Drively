@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Sora } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastContainer";
+import NavigationLoader from "@/components/ui/NavigationLoader";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -32,6 +33,7 @@ export default function RootLayout({
         className={`${poppins.variable} ${sora.variable} antialiased`}
       >
         <ToastProvider>
+          <NavigationLoader />
           {children}
         </ToastProvider>
       </body>

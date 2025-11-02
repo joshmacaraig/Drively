@@ -3,8 +3,17 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Wrench, Plus, Car, CalendarBlank, CurrencyCircleDollar, ArrowLeft } from '@phosphor-icons/react/dist/ssr';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
+import Pagination from '@/components/admin/Pagination';
 
-export default async function MaintenancePage() {
+const ITEMS_PER_PAGE = 10;
+
+export default async function MaintenancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+}) {
   const supabase = await createClient();
 
   const {
@@ -15,7 +24,20 @@ export default async function MaintenancePage() {
     redirect('/auth/login');
   }
 
-  // Fetch maintenance records with car details
+  // Pagination
+  const params = await searchParams;
+  const currentPage = parseInt(params.page || '1');
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  // Get total count
+  const { count: totalCount } = await supabase
+    .from('maintenance_records')
+    .select('*', { count: 'exact', head: true })
+    .eq('owner_id', user.id);
+
+  const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
+
+  // Fetch maintenance records with car details and pagination
   const { data: maintenanceRecords } = await supabase
     .from('maintenance_records')
     .select(`
@@ -23,7 +45,8 @@ export default async function MaintenancePage() {
       car:cars(make, model, year, plate_number)
     `)
     .eq('owner_id', user.id)
-    .order('maintenance_date', { ascending: false });
+    .order('maintenance_date', { ascending: false })
+    .range(offset, offset + ITEMS_PER_PAGE - 1);
 
   const getMaintenanceTypeColor = (type: string) => {
     switch (type) {
@@ -207,6 +230,14 @@ export default async function MaintenancePage() {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalCount || 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           )}
 
           {/* Back to Dashboard */}

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/ToastContainer';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { renterQuotes, savingQuotes } from '@/lib/loadingQuotes';
 
 export default function RenterProfilePage() {
   const router = useRouter();
@@ -258,11 +260,11 @@ export default function RenterProfilePage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <LoadingOverlay quotes={renterQuotes} />;
+  }
+
+  if (saving) {
+    return <LoadingOverlay quotes={savingQuotes} />;
   }
 
   const isVerified = profile?.verification_status === 'verified';

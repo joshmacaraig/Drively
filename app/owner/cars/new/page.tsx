@@ -21,6 +21,8 @@ import {
   CheckCircle
 } from '@phosphor-icons/react';
 import OwnerNavigation from '@/components/owner/OwnerNavigation';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import { creatingQuotes } from '@/lib/loadingQuotes';
 
 export default function NewCarPage() {
   const router = useRouter();
@@ -312,6 +314,10 @@ export default function NewCarPage() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingOverlay quotes={creatingQuotes} />;
+  }
 
   if (success) {
     return (
