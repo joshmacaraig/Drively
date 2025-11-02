@@ -288,7 +288,7 @@ export default function NewCarPage() {
           location,
           description,
           features,
-          status: 'available',
+          is_active: true,
         })
         .select()
         .single();

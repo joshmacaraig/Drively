@@ -276,16 +276,8 @@ export default function NewBookingPage() {
 
       if (rentalError) throw rentalError;
 
-      // Update car status to 'rented' only if the booking is active now
-      // (starts now or in the past, and ends in the future)
-      const now = new Date();
-      if (startDateTime <= now && endDateTime > now) {
-        await supabase
-          .from('cars')
-          .update({ status: 'rented' })
-          .eq('id', carId);
-      }
-      // If it's a future booking, keep the car status as is
+      // Car availability is now automatically determined by checking the rentals table
+      // No need to update car status - the get_available_cars() function handles this
 
       // Show success and redirect
       router.push('/owner/rentals');
@@ -651,13 +643,13 @@ export default function NewBookingPage() {
                 <option value="">Choose a car...</option>
                 {cars.map((car) => (
                   <option key={car.id} value={car.id}>
-                    {car.year} {car.make} {car.model} - {car.plate_number} (₱{parseFloat(car.daily_rate).toLocaleString()}/day) {car.status === 'rented' ? '- Currently Rented' : ''}
+                    {car.year} {car.make} {car.model} - {car.plate_number} (₱{parseFloat(car.daily_rate).toLocaleString()}/day)
                   </option>
                 ))}
               </select>
               {cars.length === 0 ? (
                 <p className="text-sm text-secondary-600 mt-2">
-                  No cars available for booking. Cars must be in "Available" or "Rented" status.
+                  No active cars available for booking.
                 </p>
               ) : (
                 <p className="text-sm text-secondary-600 mt-2 flex items-center gap-1">

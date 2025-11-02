@@ -54,24 +54,14 @@ export default async function OwnerCarsPage({
     .order('created_at', { ascending: false })
     .range(offset, offset + ITEMS_PER_PAGE - 1);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'available':
-        return 'bg-green-100 text-green-700';
-      case 'rented':
-        return 'bg-blue-100 text-blue-700';
-      case 'maintenance':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
+  const getActiveColor = (isActive: boolean) => {
+    return isActive
+      ? 'bg-green-100 text-green-700 border-green-300'
+      : 'bg-gray-100 text-gray-700 border-gray-300';
   };
 
-  const getStatusText = (status: string) => {
-    if (!status) return 'Unknown';
-    return status.charAt(0).toUpperCase() + status.slice(1);
+  const getActiveText = (isActive: boolean) => {
+    return isActive ? 'Active' : 'Inactive';
   };
 
   // Get user profile
@@ -135,27 +125,21 @@ export default async function OwnerCarsPage({
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="bg-primary-50 p-4 rounded-lg">
                 <p className="text-sm text-secondary-600 mb-1">Total Cars</p>
                 <p className="text-2xl font-bold text-primary-500">{cars?.length || 0}</p>
               </div>
               <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-secondary-600 mb-1">Available</p>
+                <p className="text-sm text-secondary-600 mb-1">Active</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {cars?.filter(c => c.status === 'available').length || 0}
+                  {cars?.filter(c => c.is_active).length || 0}
                 </p>
               </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-secondary-600 mb-1">Rented</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {cars?.filter(c => c.status === 'rented').length || 0}
-                </p>
-              </div>
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-sm text-secondary-600 mb-1">Maintenance</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {cars?.filter(c => c.status === 'maintenance').length || 0}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-secondary-600 mb-1">Inactive</p>
+                <p className="text-2xl font-bold text-gray-600">
+                  {cars?.filter(c => !c.is_active).length || 0}
                 </p>
               </div>
             </div>
@@ -222,8 +206,8 @@ export default async function OwnerCarsPage({
                             </h3>
                             <p className="text-secondary-600">{car.year} • {car.plate_number}</p>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(car.status)}`}>
-                            {getStatusText(car.status)}
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getActiveColor(car.is_active)}`}>
+                            {getActiveText(car.is_active)}
                           </span>
                         </div>
 
