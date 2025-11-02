@@ -27,7 +27,8 @@
       "Bash(npx tsx:*)",
       "Bash(curl:*)",
       "Bash(where:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

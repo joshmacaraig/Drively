@@ -53,3 +53,15 @@ SETUP_*.md
 WHY_*.md
 *_COMPLETE.md
 nul
+
+# Supabase
+/supabase/.temp/
+/supabase/.branches/
+/supabase/migrations/
+/supabase/seed.sql
+/supabase/functions/
+supabase-key.txt
+*-key.txt
+
+# Scripts (may contain sensitive data)
+/scripts/
