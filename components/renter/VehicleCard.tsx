@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarImage {
@@ -95,11 +94,10 @@ export default function VehicleCard({
       <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300">
         {/* Image */}
         <div className="relative aspect-[4/3] overflow-hidden">
-          <Image
+          <img
             src={imageSrc}
             alt={`${car.make} ${car.model}`}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {/* Status badges */}
           {nextRental && !startDate && (
@@ -191,11 +189,9 @@ export default function VehicleCard({
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
                   {car.profiles.avatar_url ? (
-                    <Image
+                    <img
                       src={car.profiles.avatar_url}
                       alt={car.profiles.full_name}
-                      width={32}
-                      height={32}
                       className="object-cover w-full h-full"
                     />
                   ) : (
