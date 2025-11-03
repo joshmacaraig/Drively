@@ -65,6 +65,17 @@ export default async function AdminVerificationsPage({
 
   const totalPages = Math.ceil((totalCount || 0) / ITEMS_PER_PAGE);
 
+  // Fetch users who haven't uploaded any documents yet (awaiting documents)
+  const { data: awaitingUsers, count: awaitingCount } = await supabase
+    .from('profiles')
+    .select('id, full_name, phone_number, phone, active_role, verification_status, created_at', { count: 'exact' })
+    .is('proof_of_id_urls', null)
+    .is('drivers_license_urls', null)
+    .is('proof_of_address_urls', null)
+    .neq('active_role', 'admin')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
   if (error) {
     console.error('Error fetching verifications:', error);
   }
@@ -254,6 +265,96 @@ export default async function AdminVerificationsPage({
               itemsPerPage={ITEMS_PER_PAGE}
             />
           </div>
+
+          {/* Users Awaiting Documents Section */}
+          {awaitingUsers && awaitingUsers.length > 0 && (
+            <div className="bg-amber-50 rounded-3xl shadow-sm border border-amber-200 p-8 mt-6">
+              <details className="group">
+                <summary className="cursor-pointer list-none">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-amber-900 flex items-center gap-2">
+                        <svg className="w-5 h-5 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        Users Awaiting Documents
+                      </h2>
+                      <p className="text-amber-700 mt-1 text-sm">
+                        {awaitingCount} {awaitingCount === 1 ? 'user has' : 'users have'} not uploaded any verification documents yet
+                      </p>
+                    </div>
+                    <span className="px-4 py-2 bg-amber-100 text-amber-800 rounded-full font-semibold text-sm">
+                      {awaitingCount}
+                    </span>
+                  </div>
+                </summary>
+
+                <div className="mt-6 overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b-2 border-amber-200">
+                        <th className="text-left py-3 px-4 font-semibold text-amber-900">
+                          User
+                        </th>
+                        <th className="text-left py-3 px-4 font-semibold text-amber-900">
+                          Status
+                        </th>
+                        <th className="text-left py-3 px-4 font-semibold text-amber-900">
+                          Role
+                        </th>
+                        <th className="text-left py-3 px-4 font-semibold text-amber-900">
+                          Registered
+                        </th>
+                        <th className="text-left py-3 px-4 font-semibold text-amber-900">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {awaitingUsers.map((user) => (
+                        <tr
+                          key={user.id}
+                          className="border-b border-amber-100 hover:bg-amber-100/50 transition-colors"
+                        >
+                          <td className="py-3 px-4">
+                            <div>
+                              <p className="font-medium text-amber-900">
+                                {user.full_name || 'Unknown'}
+                              </p>
+                              <p className="text-sm text-amber-700">
+                                {user.phone_number || user.phone || 'N/A'}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold capitalize bg-amber-100 text-amber-800">
+                              No documents
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-xs bg-amber-200/50 text-amber-800 px-2 py-1 rounded capitalize">
+                              {user.active_role || '-'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-amber-700 text-sm">
+                            {format(new Date(user.created_at), 'MMM dd, yyyy')}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Link
+                              href={`/admin/verifications/${user.id}`}
+                              className="text-amber-700 hover:text-amber-900 font-medium text-sm"
+                            >
+                              View Profile
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+          )}
         </div>
       </div>
     </div>
