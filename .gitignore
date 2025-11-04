@@ -44,7 +44,6 @@ next-env.d.ts
 
 # temporary files and scripts
 *.sql
-*.md
 nul
 
 # Supabase
@@ -58,3 +57,11 @@ supabase-key.txt
 
 # Scripts (may contain sensitive data)
 /scripts/
+
+# PWA files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/worker-*.js
+**/public/sw.js.map
+**/public/workbox-*.js.map
+**/public/worker-*.js.map
