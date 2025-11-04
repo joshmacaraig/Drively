@@ -88,7 +88,15 @@ export default withPWA({
       },
     },
     {
-      urlPattern: /\/api\/.*$/i,
+      // Exclude auth routes from caching - always go to network
+      urlPattern: /\/auth\/.*$/i,
+      handler: "NetworkOnly",
+    },
+    {
+      // API routes use NetworkFirst but exclude auth
+      urlPattern: ({ url }) => {
+        return url.pathname.startsWith('/api/') && !url.pathname.includes('/auth/');
+      },
       handler: "NetworkFirst",
       options: {
         cacheName: "apis",

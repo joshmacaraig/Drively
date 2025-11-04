@@ -21,13 +21,20 @@ export default function SignOutButton() {
         throw error;
       }
 
-      // Redirect to home page
-      router.push('/');
-      router.refresh();
+      // Clear service worker caches in PWA mode
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      }
+
+      // Force a hard reload to clear all state
+      // This works better in PWA standalone mode than router.push
+      window.location.href = '/';
     } catch (error) {
       console.error('Failed to sign out:', error);
       alert('Failed to sign out. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
