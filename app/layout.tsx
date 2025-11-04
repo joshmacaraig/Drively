@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastContainer";
 import NavigationLoader from "@/components/ui/NavigationLoader";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -71,6 +72,7 @@ export default function RootLayout({
             <NavigationLoader />
           </Suspense>
           {children}
+          <PWAInstallPrompt />
         </ToastProvider>
       </body>
     </html>
